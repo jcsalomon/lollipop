@@ -1,0 +1,425 @@
+% List.tex copyright 1992 Victor Eijkhout
+%              copyright 2014 Vafa Khalighi
+% 
+\Chapter Lists
+
+Lists in Lollipop are defined by \refcs{DefineList}:
+
+\Ver>\DefineList:Foo [...]
+    item:start [...] item:stop
+    [...] Stop<Rev
+and the resulting list is used as
+\Ver>\Foo
+\item [ ..text.. ]
+\item [ ... ]
+\FooStop<Rev
+where the closing command can be abbreviated as~\cs{>}.
+
+\Section Label alignment
+
+In general there is a default position for labels; 
+either aligning with the
+left or the right side of the margin over which the list is indented.
+The two ways are indicated with the option \refopt{item}:
+\Ver>    item:left [...] item:stop<Rev
+and \Ver>    item:right [...] item:stop<Rev respectively.
+Specifying \opt{item:start} gives the default left aligning position.
+
+\Example
+\DefineList:enumerate
+    item:start itemCounter ) item:stop Stop
+\DefineList:enumerateright
+    item:right ( itemCounter ) Spaces:1 item:stop Stop
+\enumerate\item Some item
+\item And another
+\enumerateright\item First nested item
+\item Next nested item\>
+\item And back to the original list.\>
+\ExampleStop
+
+\Section List indentation
+
+The amount over which the text of a list (excluding the item labels)
+is indented is controled by a list of indentations. This is explained
+in section~\ref[sec:indent:control]. The indentation amount is most of
+the time also equal to the value of the paragraph indentation outside
+that list.
+
+In the rare case where the indentation of a list has to be controlled
+explicitly, there is an option \refopt{indentation} with one value.
+\Ver>\DefineList:SomeList indentation=30pt [...] Stop<Rev
+
+
+\Section Label style
+
+Every list that uses the \refopt{itemsign} option is an `itemize' list,
+no matter what it's name, and there is a counter in Lollipop that
+keeps track of how deep you are in itemize lists. Similarly, every
+list that uses \refopt{itemCounter} is an `enumerate' lists, and these
+are counted too.
+
+On every next level a new style of item sign or counter is used. For
+item signs this is in sequence: $\bullet$, $\circ$, --, and $\cdot$
+for all higher levels. The style of sign can be changed by
+\refcs{SetItemSign}: \Ver>\SetItemSign:6=m<Rev where the letter
+indicating the sign is interpreted as: \n b~$\bullet$ (bullet), \n
+c~$\circ$ (circle), \n d~$\diamond$ (diamond), \n m~--- (em-dash), \n
+n~-- (en-dash), \n .~$\cdot$.
+
+Similarly, the counter style can be set by
+\refcs{SetItemCounterRepresentation}:
+\Ver>\SetItemCounterRepresentation:2=i<Rev where the letter
+representing the style is interpreted as: 1~Arabic, I~uppercase roman,
+i~lowercase roman, A~uppercase characters, a~lowercase characters.
+
+\Section Label width
+
+The default width for a label is at most the width of the margin over
+which the list is indented. Using \opt{item:left} or \opt{item:right}
+will have the label pushed to the left or right side of this margin
+respectively. Now what if the label material is wider than this
+margin? Usually you want the label then to expand to the right, and
+that is indeed what happens, unless you specify
+\refopt{labeloverflow} with value \n{left}, in which case the right
+boundary of the label will not budge, and the label will start
+protruding into the outer margin.
+
+\Section[sec:description:list] Description lists
+
+A common type of list is the type where each item label consists of a
+piece of text. Such a list is called a `description' list in
+\Lollipop, and it recognized by the occurrence of the option
+\refopt{description} in its definition. A~description list can also use
+the item sign or the item counter, of course.
+
+Using a description list, the description text is everything that
+follows the command \cs{item}, up to the end of the line.
+
+\Example
+\DefineList:TestList 
+ item:left Style:bold itemCounter . Spaces:1 description
+      Spaces:2 item:stop Stop
+\TestList\item Do
+A deer, a female deer.\item Re
+According to mr. Fowler only a legal term.
+\item Mimi Jett
+The owner/founder of ETP\>
+\ExampleStop
+
+As you can see, the problem of label overflow can easily occur with
+description lists. Thus it is a good idea to end the item material
+with some white space, as in the above example.
+
+ Exceptional situation:
+if you use an empty description text, you should write \ver>\item{}>.
+
+\Section Suspended lists
+
+Occasionally the is a need to resume an enumerate list, that is,
+after a piece of text that is not part of the list an enumerate list
+should start counting from the previous value on. In \Lollipop\ this
+phenomenon can be realized by never ending the enumerate list, and
+simply moving the text one indentation level back with
+\refcs{PopIndentLevel}.
+
+\Example
+\DefineList:enumerate item:left itemCounter item:stop Stop
+\enumerate\item First some item\par
+{\PopIndentLevel \Indent:no
+This text seems to be outside the list. Don't you believe it.\par}
+\item And another item\>
+\ExampleStop
+
+Note that the `popped' text has to be in a group (otherwise the
+subsequent items will also be popped back), and it has to be
+separated from the preceding and following text by \cs{par}; the
+trailing \cs{par} has to be in the group.
+
+\Section Item counter manipulation
+
+The item counter can be manipulated explicitly. This is necessary for
+instance for starting a list at another value than one. What you need
+to realize here is that the command \cs{item} starts by incrementing
+the counter. Furthermore, the only way to access the item counter is
+through the commands for counters; see section~\ref[sec:counters].
+
+\Example
+\DefineList:enumerate item:left itemCounter item:stop Stop
+\enumerate \SetCounter:item=-1
+\item Escape: usually the backslash.
+\item Begin Group.\>
+\ExampleStop
+
+\Section List titles and list tails
+
+Lists can have titles. The title follows the command that invokes the
+list, in the usual manner. Material to follow the list can also be
+specified: anything following the option \refopt{text} is considered to
+be trailing material.
+
+\Example
+\DefineList:TestList hrule line:start Style:bold title line:stop
+ item:left Style:italic itemCounter item:stop
+ text vwhite:3pt hrule Stop
+\TestList In the last fiscal year, have you:\par
+\item Eaten peanuts? \item Walked the dog?
+\item Bought a Frank Zappa record?\>
+\ExampleStop
+
+In case you wonder what happens with textual material after
+\opt{item:stop} and before any \opt{text}, well, that is taken to be
+inserted immediately after each item label.
+
+\Section Between the items
+
+There are special list options controlling what happens in between
+items. \Lollipop\ has an option \refopt{breakbetween}, analogous to
+\opt{breakbefore} and \opt{breakafter}; see
+section~\ref[sec:opt:penalties]. This item be default has a
+value of~\n{$-50$}, implying that breaks in between items
+should be preferred slightly over breaks in between the
+lines of an item.
+
+Similarly, there is an option \refopt{whitebetween}
+controlling the amount of white space in between items that is
+analogous to \opt{whitebefore} and \opt{whiteafter}. Like these two
+options, it can also be set by the \cs{Distance} command
+(section~\ref[sec:com:distance]).
+
+\Section Indentation in lists
+
+An item can be considered to be consisting of at least one paragraph.
+That paragraph is never indented. For the behaviour of any next
+paragraph within the same item, the option \refopt{indentinside} can be
+used. This option has values yes/no. In case paragraphs inside an
+item indent, the indentation amount is level-controlled; see
+section~\ref[sec:indent:control].
+
+\Chapter[chap:text:block] Text Blocks
+
+The `text block' is a way of treating a moderate sized chunk of text
+in a different  way from the surrounding text. Text blocks are
+created by \refcs{DefineTextBlock}. Here is a small example.
+
+\Example
+\DefineTextBlock:Quote 
+ PushIndentLevel PointSize:9 SetFont text Stop
+\Indent:no In some context it has been written that
+\Quote No man is an island.\QuoteStop
+In another:
+\Quote Run don't walk to the nearest island.\>
+Sometimes one would wish women weren't so logical.
+\ExampleStop
+
+Note that the text block has an explicit closing command,
+consisting of the name of the block followed by \opt{Stop},
+and that implicit closing by \cs{>} is possible.
+ 
+\Section The \opt{text} option
+
+Text blocks have only one specific option: \refopt{text}. This option
+is used to separate material heading the block from material trailing
+the block. Example:
+
+\Example
+\DefineTextBlock:DisplayEq 
+ whitebefore:abovedisplayskip whiteafter:belowdisplayskip
+ line:start white:parindent $ displaystyle text $ line:stop Stop
+The formula
+\DisplayEq e^{\pi i}+1=0\>
+contains nature's five most interesting constants.
+\ExampleStop
+
+Here one dollar comes before the text, and one after, so the first is
+inserted by \cs{DisplayEq} and the second by the corresponding
+closing command.
+
+Material before and after the text should usually not be broken.
+Hence \cs{nobreak} is automatically inserted. See the \cs{Example}
+macro for this manual: pages should not be broken after rules, or
+around the text `example~xyz'.
+
+\Section More examples
+
+A text block can encompass more than one paragraph, so the options
+\opt{indentinside} and \opt{indentfirst} are particularly useful here.
+
+\Example
+\AlwaysIndent:no
+\DefineTextBlock:TestBlock PushIndentLevel
+ indentafter:yes indentfirst:no indentinside:yes 
+ text unskip hfill $ bullet $ par Stop
+One paragraph.\par The next paragraph
+\TestBlock Inside the block one paragraph.\par
+Inside the block the next paragraph.\>
+Outside the following paragraph.\par And the last paragraph.
+\ExampleStop
+ 
+\ImpNote 
+\iSection[imp:gen:open:close] The environment in generic constructs
+
+The text block is just about the purest use of the \Lollipop\
+environment mechanism. Here is how a text block is defined:
+\Ver>
+\def\@DefineTextBlock{
+    \csarg\edef{\@name}{\@gen@open
+        \the\before@coms
+        }
+    \@DefineStopCommand{\the\after@coms \@gen@close}
+    }<Rev
+
+The \cs{before@coms} and \cs{after@coms} are two token lists with
+the heading and trailing commands.
+
+It is important to note that the definition of the control sequence
+of the block is defined by \cs{edef}. This first of all unwraps the
+token lists, but it also has an important effect on
+\cs{@gen@open/close}. These control sequences contain a lot of
+conditionals which, in combination with the \cs{edef} give a really
+dynamic definition of generic constructs in \Lollipop.
+
+First of all, the opening and closing commands induce a group
+so that various quantities can be set locally.
+\Ver>
+\def\@gen@open{\outer@start@commands 
+    \begingroup \inner@start@commands}
+\def\@gen@close{\inner@end@commands 
+    \endgroup \outer@end@commands}<Rev
+
+The outer start commands concern global actions such as backspacing
+previous skips, incrementing counters and setting references.
+\Ver>
+\def\outer@start@commands{%
+    \iftext@construct
+        \ifleft@embedded@construct
+              \nxp\bsp@hack
+        \else \nxp\leavehmode \nxp\bvwit{\the\@whitebefore}\fi<Rev
+The `embedded construct' tests are only true if the construct
+can be embedded in a paragraph. A~rare occurence most of the time.
+\Ver>
+        % backspace previous white space while it's visible
+        \nxp\if@headed\nxp\else
+            \ifforced@break@before\@beforepenalty
+            \else\nxp\ifnum\lastpenalty=\z@
+                         \@beforepenalty\nxp\fi
+            \fi
+        \nxp\fi<Rev
+A subtle point: a preceding heading will have placed \cs{nobreak} 
+followed by a skip. It is dangerous to place any sort of penalty
+after this because it might induce a page break.
+
+Now the counter, title, and stuff connected to that.
+\Ver>
+    \fi
+    \ifhas@counter \nxp\StepCounter:\expandafter\@name\@space
+        % This sets the \current@label by default<Rev
+Since this is used inside an \cs{edef} we can use some trickery
+to get the space token after the argument to \cs{StepCounter}.
+\Ver>
+        \ifhas@marks \edef\nxp\cs@e
+               {\nxp\nxp\nxp\refresh@mark@item
+                {\@name Counter}{\CSname{\@name Counter}}}%
+            \nxp\cs@e      
+        \fi
+        \fi
+    \iflabel@defined 
+        \global\current@label={\the\@labelcoms}\fi
+    \ifhas@title \install@title@code<Rev
+This title business is explained in~\ref[imp:install:title].
+This piece of code also refreshes the title in the mark structure.
+This has to be done after any page break for the benefit
+of headers/footers.
+\Ver>
+    \fi
+    \ifhas@marks\nxp\ifnin{\nxp\place@mark}\fi
+        %otherwise IniTeX'ing Lollipop will output a page
+    \nxp\xx@label\the\extern@toks\penalty\@M
+        % also subtle: if this white space would be higher, it would
+        % be invisible because of marks et cetera.
+        % insert nobreak after marks/writes to prevent page breaks.
+    \iftext@construct
+        \ifleft@embedded@construct
+              \else \nxp\@vwhite{\the\@whitebefore}\fi
+    \fi
+    }<Rev
+
+Inner start commands are concerned with setting local values.
+\Ver>
+\def\inner@start@commands{%
+    \nxp\Open@Group\CSname{\@class}\CSname{\@name}%<Rev
+The \cs{Open@Group} call makes it possible to track down groups
+that have inadvertendly been left open. Since we now know the
+name we can give helpful error msgs.
+\Ver>
+    \install@stop<Rev
+Install the right implicit closing, see~\ref[sec:implicit:close]
+and~\ref[imp:implicit:close].
+\Ver>
+    \ifleft@embedded@construct
+    \else \nxp\hold@parskip 
+        \nxp\@defaulteverypar
+        \ifwhiteleft@defined \advance\leftskip \the\@whiteleft \relax \fi
+        \ifwhiteright@defined \advance\rightskip \the\@whiteright \relax \fi
+        \nxp\let\nxp\par=\nxp\@par %explain to me again why this is necessary...
+        \inside@indent \first@indent
+    \fi
+    \advance\nest@depth\@ne<Rev
+The nest depth is used for determining indentation levels.
+\Ver>
+    }<Rev
+
+End commands set up some conditions, most of which will be tested
+by the start of any next construct.
+\Ver>
+\def\inner@end@commands{%
+    \nxp\Close@Group\CSname{\@class}\CSname{\@name}%
+    \ifright@embedded@construct \else \nxp\leavehmode \fi
+    \@afterpenalty
+    \ifright@embedded@construct \else \nxp\@vwhite{\the\@whiteafter}\fi
+    }
+\def\outer@end@commands{%
+    \the\after@toks
+    \ifright@embedded@construct 
+        \nxp\@headedno \nxp\esp@hack
+    \else
+        \after@indent \nxp\dono@parskip
+    \fi}<Rev
+
+\iSection[imp:implicit:close] Implicit closing
+
+Constructs with an explicit closing command, lists and text blocks,
+can be closed by~\cs{>}, which simply closes the current
+construct. A~more drastic version, \cs{>]}, closes all currently
+open constructs.
+\Ver>
+\def\outer@stop@command{\Emessage{Vacuous group closing}}
+\let\default@stop@command\outer@stop@command
+\def\>{\default@stop@command%[fool the editor
+    \ifNextChar]{%
+        \ifx\default@stop@command\outer@stop@command
+            \xp\take@one
+        \else \xp\>\fi}{}}<Rev
+The \cs{outer@stop@command} is meant to give an error msg if the
+user attempts to close a group while none is open.
+
+The current meaning of~\cs{>} is installed in
+\cs{inner@start@commands}:
+\Ver>
+\def\install@stop{\if@implicitclose
+        \def\nxp\default@stop@command
+               {\CSname{\stop@command}}%
+    \else \let\nxp\default@stop@command
+              \nxp\outer@stop@command 
+    \fi}<Rev
+
+By default, constructs can be closed implicitly, but there is an
+option \refopt{noimplicitclose} to disable this.
+\Ver>
+\newif\if@implicitclose
+\add@generic@default{\@implicitcloseyes}
+\@GenericOption{noimplicitclose}{\@implicitcloseno}<Rev
+This option is for instance used in the examples in this manual.
+Otherwise closing a construct in the example would also close the
+example itself.
+
+\ImpNoteStop

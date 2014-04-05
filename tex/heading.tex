@@ -1,0 +1,32 @@
+% Heading.tex copyright 1992 Victor Eijkhout
+%                     copyright 2014 Vafa Khalighi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% H E A D I N G S %%%%%%%%%%%%
+\@GenericConstruct{Heading}
+
+\newif\if@headed
+\add@generic@default{\add@after@command{\@headedno}}
+\add@Heading@default{\add@after@command{\@headedyes}}
+
+\add@Heading@default{\def\@afterpenalty{\penalty\@M}
+    \default@break@afterno}
+\add@Heading@default{\has@marksyes}
+
+\def\@DefineHeading{
+    \@DefineStopCommand{\relax}
+    \csarg\edef{\@name}%
+       {\@gen@open % this contains: \let\CSname{\@name Title}\nxp\tmp@title
+        \the\@main@options@list
+        \@gen@close}
+    }
+
+\@HeadingOption{TwoLines}{\switch {\if\EqualString{#1}}
+    {yes} {\add@after@command{\next@paragraph{\clubpenalty\M@
+                \next@paragraph{\global\clubpenalty\default@clubpenalty}}}}
+    {no}  {\add@after@command{\clubpenalty\default@clubpenalty}}
+    {default} {\edef\cs@e{\nxp\add@after@command{\nxp\next@paragraph
+                {\clubpenalty\@w@w{#1}\relax\nxp\next@paragraph
+                            	{\global\clubpenalty\default@clubpenalty}}}}
+            \cs@e}
+    \endswitch}
+

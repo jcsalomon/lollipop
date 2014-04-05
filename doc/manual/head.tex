@@ -1,0 +1,102 @@
+% Head.tex copyright 1992 Victor Eijkhout
+%                 copyright 2014 Vafa Khalighi
+%
+\Chapter Headings
+
+Headings for sections, chapters, and such, are an essential part of
+any \TeX\ macro package. In Lollipop they are maybe a bit less
+special: all options for headings are general options, meaning that
+they also apply to text blocks and lists. There are only two things
+that distinguish headings:
+
+\Enumerate
+\item there will be no page break after a heading;
+\item there is no closing command for a heading.
+\>
+
+\Section[sec:head:examples] Examples
+
+Headings are defined by \refcs{DefineHeading}.
+The most obvious element in a heading is the title, marked by the
+option \refopt{title}. The title is anything that follows the heading
+command, upto the first empty line.
+
+\Ver>\SomeHeading Some title
+
+And some text following it.<Rev
+
+\ImpNote
+Titles can also be terminated by \cs{par}, but knowledge of this is
+not encouraged. See further~\ref[imp:title:delimiting].
+\ImpNoteStop
+
+The title has to be
+included in a line or a textcolumn for proper handling (see
+also section~\ref[sec:opt:traps]). For titles that do not exceed one
+line, the \opt{line} option suffices (section~\ref[sec:opt:line]); if a
+title is possibly more than one line long, the \opt{textcolumn} option
+has to be used (section~\ref[sec:opt:textcolumn].
+
+\Example 
+\DefineHeading:TestSection Style:bold
+    line:start TestSectionCounter Spaces:2 title line:stop
+    Stop
+\TestSection The Title
+
+The text after the heading.
+\ExampleStop
+
+By default, the text after a heading is indented. Overriding this
+default behaviour is done with the option \refopt{indentafter}.
+
+\Example
+\AlwaysIndent:no % as a default, don't indent paragraphs
+\DefineHeading:TestSection Style:bold
+    line:start TestSectionCounter Spaces:2 title line:stop
+    indentafter:yes Stop
+\TestSection The Title
+
+The text after the heading.\par
+The second paragraph after the heading
+\ExampleStop
+
+Usually headings come in a hierarchy, where the counter of one type,
+for instance a subsection, is reset everytime the counter of a higer
+level  is stepped. In \Lollipop, this subordinating of headings is
+done by declaring one counter to be governed by another (counters
+are explained in full detail in section~\ref[sec:counters]). 
+
+\Example
+\DefineHeading:TestChapter Style:bold
+    line:start TestChapterCounter Spaces:1 title line:stop
+    Stop
+\DefineHeading:TestSection Style:italic
+    line:start TestChapterCounter : TestSectionCounter . Spaces:1
+        title line:stop Stop
+\GoverningCounter:TestSection=TestChapter
+
+\TestChapter Level One Heading\par
+\TestSection Level Two Heading\par
+Some text.
+\TestSection Level Two again\par
+More text.
+\TestChapter Level One is Stepped\par
+\TestSection Level Two\par
+Again text.
+\ExampleStop
+
+Headings will often wind up in a table of contents. For this, the
+table of contents will have to be declared:
+\Ver>\DefineExternalFile:contents=toc<Rev
+and its formatting will have to be specified, but also every
+construct that writes to this file has to be declared as such.
+
+\Ver>\DefineHeading:TestSection
+    [...]
+    external:contents title external:stop
+    Stop<Rev
+
+Usually, the title is all that has to be written out (the counter
+value is written by default), but the possibility exists for writing
+out other information as well. See section~\ref[sec:ext-option].
+

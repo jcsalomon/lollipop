@@ -1,0 +1,722 @@
+% Output.tex copyright 1992/3 Victor Eijkhout
+%                   copyright 2014 Vafa Khalighi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% O U T P U T %%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\@GenericConstruct{PageGrid}
+
+\newif\if@pagegrid@installed
+\ifini{\next@paragraph
+   {\if@pagegrid@installed \else 
+        \Wmessage{No page grid installed}\fi
+   }}
+\NewTrace:out
+\add@PageGrid@default{\text@constructno}
+\add@PageGrid@default{\has@marksyes}
+
+\newtoks\user@overrides
+\def\add@user@override#1{\append@to@list{user@overrides}{#1}}
+
+\newif\if@nubalanceren
+\newinsert\botins
+
+%%%% Page counting
+%
+% \count0 is the paper counter: 
+%     is increased for every \shipout in the output routine
+% \count1 is the page counter:
+%     you can do with it whatever you like.
+
+% This appears to the users as if \NewCounter:Page had been done.
+% We do it by hand because the number has to be 1.
+%
+\countdef\sheet@counter=0
+\csarg\countdef{\counter@name{Page}}=1 
+\edef\PageValue{\counter@@name{Page}}
+\CounterRepresentation:Page=1
+\newtoks\Page@RL %trudge trudge!
+\SetCounter:Page=1
+
+%%%% Tests
+%
+\DefineTest:IsRightPage
+\DefineTest:IsLeftPage
+\DefineTest:IsFirstPage
+\DefineTest:IsLastPage
+\DefineTest:FlushBottom
+
+%% anonieme cs'en zijn in gebruik bij opbouw en gebruik %%
+% \tempdima : / klad; gebruikt voor hoofdmeting; daarna in \text@column
+% \tempdimc : / klad; gebruikt voor voetmeting
+% \cs@a : in gebruik door \haalitems
+
+\def\slotpenalty{-10001}
+
+\def\@pseudoif#1#2{\tempcounta\escapechar \noesc
+    \edef\cs@e{\let\CSname{if@\string#1}\CSname{if\string#2}}\cs@e
+    \escapechar\tempcounta}
+\@pseudoif\IsFirstPage\true \@pseudoif\IsLastPage\true
+\@pseudoif\IsRightPage\true
+\@pseudoif\IsLeftPage\false
+
+\def\leftright@setup
+   {\csarg\ifodd{\counter@name{Page}}\relax 
+                \IsRightPage:yes \IsLeftPage:no
+          \else \IsRightPage:no  \IsLeftPage:yes
+          \fi}
+\def\firstpage@setup{\def\cs@a{yes}
+    \edef\cs@b{\xp\get@placed\xp{\firstmark}{first@page}}
+    \ifx\cs@a\cs@b \IsFirstPage:yes \else \IsFirstPage:no \fi}
+\def\lastpage@setup
+    {\ifnum\outputpenalty=\slotpenalty\relax 
+        \Tmessage[out]{Last page}\IsLastPage:yes
+     \else \IsLastPage:no
+     \fi}
+\def\output@setup{\let\par\@par
+    \parindent\z@ \leftskip\z@ \rightskip\z@ \lineskip\z@
+    \default@everypar \MainFont
+    \leftright@setup    \firstpage@setup    \lastpage@setup
+    \@colnum\@ne \output@set@page@width
+    \Tmessage[out]{Incoming text: (\the\ht\@cclv+\the\dp\@cclv) x
+                   \the\wd\@cclv}
+    }
+
+%%%%%%%%%%%%%%%% Head, Foot, Body
+%
+% Separate boxes are allocated for the page
+% head, body, and foot.
+% Head and foot contain static material, the
+% body contains the text. The body can be empty.
+%
+\newbox\page@head@box \newtoks\page@head@toks
+\page@head@toks{}
+\add@PageGrid@default
+   {\page@head@toks={\setbox\page@head@box=\vbox\bgroup}}
+\newdimen\head@height
+\def\measure@head{\head@height=\ht\page@head@box
+    \advance\head@height\dp\page@head@box
+    \Tmessage[out]{Head measurement: \the\head@height}}
+
+\newbox\page@foot@box \newtoks\page@foot@toks 
+\page@foot@toks{}
+\add@PageGrid@default{\page@foot@toks=
+              {\setbox\page@foot@box=\vbox\bgroup}}
+\newdimen\foot@height
+\def\measure@foot{\foot@height=\ht\page@foot@box
+    \advance\foot@height\dp\page@foot@box
+    \Tmessage[out]{Foot measurement: \the\foot@height}}
+
+\def\goal@height@trace
+   {\tempdimb\text@height
+    \multiply\tempdimb\ifnum\user@n@cols=\m@ne\n@cols\else\user@n@cols\fi
+    \Tmessage[out]{Aim for  text height: \the\text@height\@space
+    \ifnum\user@n@cols>\m@ne (\the\user@n@cols\@space columns;
+                total height: \the\tempdimb)
+    \else\ifnum\n@cols>\@ne (\the\n@cols\@space columns;
+                total height: \the\tempdimb)
+    \fi\fi}}
+
+\def\report@body@measurement{
+    \Tmessage[out]{Body measurement:
+        (\the\ht\page@body@box+\the\dp\page@body@box) 
+        x\the\wd\page@body@box}
+    \ifvoid\topins\else
+        \Tmessage[out]{Top inserts: \the\ht\topins+\the\dp\topins}\fi
+    \ifvoid\botins\else
+        \Tmessage[out]{Foot inserts: \the\ht\footins+\the\dp\footins}\fi
+    }
+
+\newbox\page@body@box \newtoks\page@body@toks
+\page@body@toks{}
+\add@PageGrid@default
+   {\page@body@toks={\setbox\page@body@box=\vbox\bgroup}}
+
+\def\finish@part@routines
+   {\append@to@list{page@head@toks}{\egroup\measure@head}
+    \append@to@list{page@foot@toks}{\egroup\measure@foot}
+    \append@to@list{page@body@toks}{\egroup}}
+
+\newbox\WholePage
+\def\make@page{
+    \setbox\WholePage=\vbox 
+       {\box\page@head@box
+            \ifabut@head\nointerlineskip\fi
+            \ifabut@foot\tempdima\dp\page@body@box\fi
+        \box\page@body@box 
+            \ifabut@foot\ifvoid\page@foot@box\else
+                 \kern-\tempdima\relax\nointerlineskip\fi\fi
+        \box\page@foot@box}%\showbox\WholePage
+    }
+
+% \vsize has two possibilities:
+% 1/ it is calculated dynamically by subtracting
+% body and foot height from the total page height.
+% If \vsize is different from \ht255, the page
+% is thrown back.
+% 2/ it is set and the page has whatever size results.
+%
+\newif\iftext@fits
+\def\see@if@text@fits
+   {{\multiply\text@height\n@cols 
+     \tempdima\text@height
+     \advance\tempdima-\vsize
+     \ifdim\tempdima<\z@ \tempdima=-\tempdima \fi
+     \ifdim\tempdima<.1pt\relax
+           \global\text@fitsyes
+           \Tmessage[out]{Page accepted.}
+     \else \global\text@fitsno
+           \Tmessage[out]{Text does not fit. (vsize=\the\vsize)}
+           \global\vsize=\text@height
+     \fi}}
+
+% Multicolumn stuff
+% 
+% every PageGrid macro installs \n@cols, but the user
+% can specify a different number with \NumberOfColumns:x
+% This sets \user@n@cols which is usually -1
+%
+\newcount\n@cols \n@cols\@ne
+\newcount\@colnum
+\newcount\user@n@cols \user@n@cols\m@ne
+\Distance:GutterWidth=1cm
+\def\NumberOfColumns:#1
+   {\user@n@cols=\w@w{#1}\relax
+    \Tmessage[out]{Switch to \the\user@n@cols\@space columns}
+    \hsize\page@width 
+    \tempdima\GutterWidth \multiply\tempdima\user@n@cols
+    \advance\tempdima-\GutterWidth
+    \advance\hsize-\tempdima \divide\hsize\user@n@cols
+    \Tmessage[out]{New hsize: \the\hsize}}
+\add@user@override{\ifnum\user@n@cols=\m@ne\else
+    \csarg\let{\output@routine @body}\trivial@body
+    \n@cols\user@n@cols
+    \Tmessage[out]{User override: \the\n@cols\@space columns.}%
+    \fi}
+
+\def\trivial@body{\Tmessage[out]{Trivial multicolumn (\the\n@cols) setup}
+    \@colnum\@ne \splittopskip\topskip
+    \setbox\page@body@box\hbox{\text@column}
+    \@colnum\tw@
+    \ifnum\n@cols>\@ne 
+        \loop \setbox\page@body@box\hbox{\unhbox\page@body@box
+              \kern\GutterWidth \text@column}
+              \advance\@colnum\@ne
+              \ifnum\@colnum>\n@cols\else\repeat
+    \fi}
+\def\real@text@column{\begingroup\vbadness\@M
+    \setbox\z@
+    \ifnum\n@cols=\@ne
+        \vbox to \vsize{\boxmaxdepth\maxdepth
+                 \ifvoid\topins\else\unvbox\topins \fi
+                 \unvbox\@cclv
+                 \ifvoid\footins\else\unvbox\footins \fi}%
+        \Tmessage[out]{Column: \the\ht\z@+\the\dp\z@}%
+    \else
+        \vsplit\@cclv to \text@height
+        \Tmessage[out]{Column \the\@colnum: \the\ht\z@+\the\dp\z@}%
+    \fi \ifnum\badness=\@M\Wmessage{Underfull textcolumn}\fi
+    \box\z@ \endgroup}
+
+\def\CurrentShipout{\shipout\box\WholePage}
+\let\OriginalShipout\CurrentShipout 
+\newif\ifCountSheets \CountSheetsyes
+\def\finish@off@page{\Tmessage[out]{Whole page:
+                        \the\ht\WholePage+\the\dp\WholePage}
+    {\def\protect{\noexpand\protect\noexpand}
+     \def\cprotect{\expandafter\string}
+     \normalesc
+     \ifsink@pages 
+       \message{Page sunk [\the\sheet@counter.\csarg\the
+                                     {\counter@name{Page}}]}
+       \deadcycles\z@
+     \else \CurrentShipout
+           \ifCountSheets\global\advance\sheet@counter\@ne\fi
+     \fi
+     }
+    \global\step@counter{Page}
+    }  
+\def\shipout@and@unbox@remainder{
+    \iftext@fits \make@page \finish@off@page \fi
+    \ifvoid\@cclv \Tmessage[out]{Shipped out whole page}
+    \else \Tmessage[out]{Part of page not shipped: \the\ht\@cclv} 
+          \unvbox\@cclv 
+          \ifnum\outputpenalty=\@M\else\penalty\outputpenalty\fi
+    \fi
+    \iftext@fits \ifother@grid\install@next@page@grid
+                 \else\Tmessage[out]{Same grid once again.}\fi 
+    \fi}
+
+\newif\ifsink@pages
+\sink@pagesno
+\let\NoPages\sink@pagesyes \let\PagesOut\sink@pagesno
+
+% this is a mess. clear up please.
+\newtoks\page@options
+\def\options@to@pagepart
+   {\append@toks@cs@to@list{page@\page@part @toks}\page@options
+              \page@options={}}
+\add@PageGrid@default{\csarg\newtoks{\@name @routine}
+    \def\@current@options@list{page@options}
+    \def\page@part{head}\page@options{}
+    }
+
+\def\install@output@routine#1{{\globaldefs\@ne
+    \output=\xp{\csname#1@routine\endcsname}%
+    \def\output@routine{#1}%
+    \Tmessage[out]{Install output: #1 ---}%
+    \@pagegrid@installedyes
+    \csname#1@install@parameters\endcsname
+    }}
+
+\newdimen\text@height
+
+% During the load of this file we build up a list of
+% defaults and test. These are then turned into PageGrid@default
+% at the end of this file.
+\newtoks\otr@settings \newtoks\otr@conditions
+\def\add@otr@setting#1{\append@to@list{otr@settings}{#1}}
+\def\del@otr@setting#1{\del@tok@from@list{otr@settings}#1}
+\def\add@otr@condition#1{\append@to@list{otr@conditions}{#1}}
+\def\set@otr@stuff{\def\cs@e##1{
+    \edef\cs@f{\nxp\adds@PageGrid@default{\global##1={\the##1}}}
+    \cs@f}
+  \cs@e\otr@settings \cs@e\otr@conditions}
+%\showthe\otr@settings \showthe\otr@conditions
+%\showthe\PageGrid@defaults}
+       
+\def\@DefinePageGrid{\options@to@pagepart \finish@part@routines
+    \csarg\edef{\@name @install@parameters}{%
+          \vsize\the\height@toks\relax \set@topskip
+          \multiply\vsize
+            \nxp\ifnum\user@n@cols>\@ne\user@n@cols\relax
+            \nxp\else\the\n@cols\relax\nxp\fi
+          \hsize\the\width@toks\relax
+          \def\CSname{\@name @page@width}%
+                 {\the\width@toks\relax}%
+          \nxp\Tmessage[out]{Initial hsize: \nxp\the\hsize}%
+          \ifwidth@of@text 
+          \else \nxp\hsize@from@page@width
+                \ifnum\the\n@cols>1 
+                    \divide\hsize\the\n@cols\relax\fi
+          \fi
+          \nxp\Tmessage[out]{Installed hsize: \nxp\the\hsize}%
+          }
+    \csarg\edef{\@name @otr@parameters}{%
+          \the\otr@settings
+          \xp\@empty\the\otr@conditions
+          \CSname{height@of@text\ifheight@of@text yes\else no\fi}%
+          \text@height\the\height@toks\relax
+          \CSname{width@of@text\ifwidth@of@text yes\else no\fi}%         
+          \n@cols\the\n@cols\relax}
+    \csarg\edef{\@name @head@foot}{\the\page@head@toks 
+          \the\page@foot@toks
+          \ifheight@of@text\else
+          \advance\text@height-\head@height 
+          \advance\text@height-\foot@height
+          \fi}
+    \csarg\edef{\@command @body}{\the\page@body@toks}
+    \csarg\edef{\@command}{%
+          \nxp\EjectPage
+          \nxp\install@output@routine{\@name}%
+          %\global\hsize= \ifseen@text \CSname{\@name @text@width}%
+          %           \else \CSname{\next@page@grid @text@width}%
+          %           \fi
+          \outer@start@commands \after@indent
+          }
+  \csarg\edef{\@name @routine}{
+    \nxp\Tmessage[out]{======== Output routine: \@name\@space ==========}
+    \nxp\output@setup 
+    \CSname{\@name @otr@parameters}
+    \nxp\the\user@overrides
+    \CSname{\@name @head@foot}
+    \nxp\goal@height@trace
+    \ifnum\n@cols=\z@ %% no text, trivial case.
+      \setbox\page@body@box\voidb@x 
+      \nxp\text@fitsyes
+    \else \nxp\ifragged@bottom\nxp\text@fitsyes
+      \nxp\else\nxp\see@if@text@fits\nxp\fi
+      \nxp\iftext@fits
+          \let\nxp\text@column\nxp\real@text@column
+          \tempcounta\hbadness\hbadness\@M\CSname{\@name @body}
+          \nxp\ifnum\badness>\tempcounta
+            \nxp\Wmessage{Underfull page body}\nxp\fi
+          \hbadness\tempcounta\nxp\report@body@measurement
+          \nxp\fi
+    \fi
+    \nxp\shipout@and@unbox@remainder
+    \nxp\Tmessage[out]{==========}%
+    }
+  \xp\install@output@routine\xp{\@name}
+  }
+
+% not operative yet.
+\new@dimen{user@page@height}{\m@ne sp}
+\new@dimen{user@text@height}{\m@ne sp}
+\def\Height:#1=#2
+   {\switch {\if\EqualString{#1}}
+    {Page} {\user@page@height\w@w{#2}}
+    {Text} {\user@text@height\w@w{#2}}
+    {default} {\Wmessage{Unknown option: `Height:#1=#2'}}
+    \endswitch}
+
+%-- height of page/text
+%
+% the \ifheight@of@text conditional is also used
+% during run time.
+%
+\newif\ifheight@of@text
+\newtoks\height@toks \newdimen\page@height
+\add@PageGrid@default{\height@of@textyes\height@toks{20cm}}
+\add@PageGrid@default{\let\text@lines\relax}
+\@PageGridOption{height}{
+    \switch {\if\EqualString{#1}}
+        {page}  {\height@of@textno}
+        {text}  {\height@of@textyes}
+        {lines} {\height@of@textyes
+              \edef\cs@e{\def\nxp\text@lines{\@w@w{#2}}}\cs@e}
+        {default} {\Wmessage{Strange modifier: `height:#1=#2'}}
+    \endswitch
+    \edef\cs@e{\nxp\height@toks={\@w@w{#2}}}\cs@e
+    }
+% Make sure that the \Height command is not used!
+\@PageGridNOOP{Height}
+
+%%%%
+%
+% Width handling
+%
+\newif\ifwidth@of@text
+\newtoks\width@toks \newdimen\page@width
+\@PageGridOption{width}{
+    \switch {\if\EqualString{#1}}
+        {page} {\width@of@textno}
+        {text} {\width@of@textyes}
+        {default} {\Wmessage{Strange modifier: `width:#1=#2'}}
+    \endswitch
+    \edef\cs@e{\nxp\width@toks={\@w@w{#2}}}\cs@e
+    }
+
+% Make sure that the \Width command is not used!
+\@PageGridNOOP{Width}
+
+% At installation of the output routine, calculate the hsize
+% if the page width is given.
+%
+\def\hsize@from@page@width
+   {\def\text@column{\hskip\z@\relax}%
+    \everyhbox{}\everyvbox{}%
+    \let\maybe@to@page@width\relax
+    \the\page@body@toks 
+%\ifdim\wd\page@body@box>0pt \showthe\page@body@toks \fi
+    \Tmessage[out]{Width page body minus text: \the\wd\page@body@box}%
+    \global\advance\hsize-\wd\page@body@box}
+
+% At the start of the output routine, calculate the page width
+% from the hsize (which may have been tinkered with), or set to
+% routine-specific page width (which may also have been changed).
+%
+\def\output@set@page@width
+   {\ifwidth@of@text
+        \edef\text@column{\hskip\the\wd\@cclv\relax\hskip\z@\relax}%
+        \let\maybe@to@page@width\relax
+        \csn\output@routine @body\ecs
+        \page@width\wd\page@body@box
+        \Tmessage[out]{Deduced page width: \the\page@width}
+    \else \def\maybe@to@page@width{ to \page@width}
+        \page@width\csn\output@routine @page@width\ecs\relax
+    \fi}
+
+%%%% Topskip
+% initially the outer topskip is picked up, unless
+% the option 'topskip' is given.
+%
+\add@PageGrid@default
+   {\edef\set@topskip
+      {\topskip\the\topskip\relax\splittopskip\topskip}}
+\@PageGridOption{topskip}{
+    \edef\cs@e
+       {\def\nxp\set@topskip{\topskip\@w@w{#1}\relax
+                     \splittopskip\topskip}}
+    \cs@e
+    }
+% ragged bottom the way it's done in plain TeX.
+\newif\ifragged@bottom
+\add@otr@setting{\ragged@bottomno}
+\@PageGridOption{raggedbottom}{
+    \del@otr@setting{\ragged@bottomno}
+    \add@otr@setting{\ragged@bottomyes}
+    \if\IsEmptyList{#1}\@add@toks{\var@topskip{60pt}}
+    \else\edef\cs@e{\nxp\@add@toks{\nxp\var@topskip{\@w@w{#1}}}}
+         \cs@e
+    \fi}
+\def\var@topskip#1{\tempdima\topskip\tempskipa\z@ plus #1\relax
+    \topskip\tempdima \advance\topskip\tempskipa
+    \splittopskip\topskip}
+
+%-- textband
+\newif\ifin@textband \add@PageGrid@default{\in@textbandno}
+\@PageGridOption{textband}{
+    \switch {\if\EqualString{#1}}
+        {start} {\start@textband}
+        {stop}  {\stop@textband}
+        {default} {\Wmessage{Strange modifier `textband:#1'}}
+    \endswitch}
+\newdimen\text@width
+\def\start@textband
+   {\options@to@pagepart 
+    \b@group[textband]\@hmodeyes\in@textbandyes
+    \@add@toks{\hbox \maybe@to@page@width\bgroup}
+    }
+\def\stop@textband
+   {\@add@toks{\egroup} \e@group[textband]
+    \ifseen@text \before@textno
+             \def\page@part{body} \options@to@pagepart
+             \def\page@part{foot} 
+    \fi}
+
+%-- band
+\newif\ifabut@foot \newif\ifabut@head
+\add@otr@setting{\abut@footno \abut@headno}
+\@PageGridOption{band}{
+  \switch {\if\EqualString{#1}}
+    {start} {\@add@toks{\hbox to \page@width\bgroup}
+              \b@group[band]\@hmodeyes
+              \def\block@closing{\@add@toks{\hfil\egroup}
+                  \e@group[band]}}
+    {invisible} {\@add@toks{\setbox\tempboxa
+                                \hbox to \page@width\bgroup}
+              \b@group[band]\@hmodeyes
+              \def\block@closing{\@add@toks{\hfil\egroup}
+                  \ifbefore@text
+                      \@add@toks{\vtop to\z@{\kern\z@\box\tempboxa\vss}
+                                      \nointerlineskip}
+                      \del@otr@setting{\abut@headno}
+                      \add@otr@setting{\abut@headyes}
+                      %\global\abut@headyes
+                  \else  \@add@toks{\nointerlineskip
+                                      \vbox to\z@{\vss\box\tempboxa}}
+                      \del@otr@setting{\abut@footno}
+                      \add@otr@setting{\abut@footyes}
+                      %\global\abut@footyes
+                  \fi\e@group[band]}}
+    {stop}  {\block@closing}
+    {default} {\Wmessage{Strange modifier `band:#1'}}
+  \endswitch}
+
+
+%-- next page grid
+\newif\ifother@grid
+\add@PageGrid@default{\other@gridno}
+\add@otr@setting{\other@gridno}
+\add@otr@condition{\ifother@grid
+    \def\nxp\install@next@page@grid
+       {\nxp\install@output@routine{\next@page@grid}}%
+  \fi}
+\@PageGridOption{NextPageGrid}{\other@gridyes
+    \del@otr@setting{\other@gridno}
+    \add@otr@setting{\other@gridyes}
+    \def\next@page@grid{#1}
+    }
+
+%-- text
+\add@PageGrid@default{\n@cols\z@}
+\newif\ifbefore@text 
+\newif\ifseen@text %this one is also used by 'external'
+\add@PageGrid@default{\before@textyes \seen@textno}
+\@PageGridOption{text}{\global\seen@textyes
+    \ifin@textband\else\Emessage{'text' has to be in 'textband'}\fi
+    \global\advance\n@cols\@ne
+    \@add@toks{\text@column}}
+
+%%%%%%%%%%%%%%%%%%%%%%% user commands
+
+\def\leegbladinvoegen{\@g@stapteller{Page}}
+\def\EjectPage{\vfil\eject}
+\def\ToRecto{\csarg\ifodd{\counter@name{Page}}\else\step@counter{Page}\fi}
+\def\ToVerso{\csarg\ifodd{\counter@name{Page}}\step@counter{Page}\fi}
+
+% less useful user command (mostly for formatting the manual :-)
+%
+\newbox\saved@page@box \newdimen\saved@hsize \newcount\saved@pageno
+\newtoks\saved@mark@items
+\def\SuspendOutput{\xdef\saved@output@routine{\output@routine}%
+    \let\saved@shipout\CurrentShipout
+    \global\saved@hsize\hsize \global\saved@mark@items\mark@items
+    \global\saved@pageno\cs@counter@name{Page}%
+    \output{\global\setbox\saved@page@box\box\@cclv
+            \Tmessage[out]{Suspend output @\the\saved@pageno; 
+               saved (\the\ht\saved@page@box+\the\dp\saved@page@box)
+               x \the\wd\saved@page@box}%
+            \global\output{\Emessage{You should not call output now!}%
+                           \OriginalShipout\box\@cclv}}%
+    \eject
+    }
+\def\ResumeOutput
+   {\xp\install@output@routine\xp{\saved@output@routine}%
+    \let\CurrentShipout\saved@shipout
+    \global\hsize\saved@hsize \global\mark@items\saved@mark@items
+    \global\cs@counter@name{Page}\saved@pageno
+    \unvbox\saved@page@box
+    \Tmessage[out]{Resume output}%
+    }
+ 
+%%%%%%%%%%%%%%%% Marks
+%%%%
+\NewTrace:mark
+\def\FirstPlaced:#1 
+   {\Tmessage[mark]{First Placed #1 from \firstmark}%
+    \xp\get@placed\xp{\firstmark}{#1}}
+\def\PreviousPlaced:#1
+   {\Tmessage[mark]{Previous Placed #1 from \topmark}%
+    \xp\get@placed\xp{\topmark}{#1}}
+\def\LastPlaced:#1
+   {\Tmessage[mark]{Last Placed #1 from \botmark}%
+    \xp\get@placed\xp{\botmark}{#1}}
+\def\get@placed#1#2{%
+    \get@@placed{#2}#1{SM}{}$}% SM: StopMarker
+\def\get@@placed#1#2#3{\if\EqualStringX{#2}{SM}\xp\take@to@dollar
+    \else\if\EqualStringX{#1}{#2}%
+              \maybe@uppercase{#3}\xp\xp\xp\take@to@dollar
+         \else\xp\xp\xp\get@@placed\fi
+    \fi{#1}}
+\ifini{\newtoks\mark@items}
+      % \newtoks\mark@toks % is this one used?
+
+\newif\ifhas@marks
+\add@generic@default{\has@marksno}
+    % only yes in heading and output routine.
+    % it seems that you can have page breaks at marks...
+\@GenericOption{nomarks}{\has@marksno}
+\def\add@mark@item#1{\csarg\newtoks{mark@toks@#1}%
+    \Tmessage[mark]{Adding mark item #1}%
+    \global\mark@items\xp{\the\mark@items{#1}}}
+\def\refresh@mark@item#1#2{\csarg\global{mark@toks@#1}{#2}}
+\def\get@mark@items#1{\if\EqualStringX{#1}{SM}%
+    \else{#1}{\csarg\the{mark@toks@#1}}\xp\get@mark@items
+    \fi}
+\def\place@mark{\mark{\xp\get@mark@items\the\mark@items{SM}}}
+
+% this one should be defined in document.tex
+\add@mark@item{first@page}
+
+% Page wide rule
+
+\@PageGridOption{pagerule}{
+    \@add@toks{\hrule width\page@width\relax\nobreak}}
+
+% Set default otr@settings and otr@conditions
+\set@otr@stuff
+
+\endinput
+
+92/10/24 raggedbottom in progress
+92/11/04 splittopskip made equal to topskip
+92/11/14 messed with otr@xyz token lists
+92/11/15 warning on underfull text column;
+           ragged bottom still not working properly
+93/01/17 box \WholePage, new definition of \CurrentShipout
+
+
+%%%%%%%%%%%%%%%%%%%%%% Old Stuff; maybe useful, maybe not
+
+\newskip\@topS \newskip\@botS
+{\noeol
+\othercr
+\gdef\topillustratie{\bgroup\othercr \@topill}
+\gdef\@topill:#1=#2^^M{\edef\cs@e{\gdef\CSname{@topS#1}{#2}}
+    \cs@e \global\advance\@topS #2\egroup}
+\gdef\botillustratie{\bgroup\othercr \@botill}
+\gdef\@botill:#1=#2^^M{\edef\cs@e{\gdef\CSname{@botS#1}{#2}}
+    \cs@e \global\advance\@botS #2\egroup}}
+
+\def\@wisill{\global\@topS\z@ \global\@botS\z@
+    \csarg\gdef{@topS1}{\z@}\csarg\gdef{@botS1}{\z@}
+    \csarg\gdef{@topS2}{\z@}\csarg\gdef{@botS2}{\z@}
+    \csarg\gdef{@topS3}{\z@}\csarg\gdef{@botS3}{\z@}
+    }
+\@wisill
+
+\newtoks\@stramienlijst
+\def\invoerpad{}
+\def\opmaak: #1\par{\@stramienlijst={}
+    \def\cs@a##1 {\eqstring{##1}{klaar}{}%
+       {\append@to@list{@stramienlijst}{\@probeerstramien ##1;}
+        \cs@a}}
+    \cs@a #1klaar }%% let op de significante spaties!!
+    %% en de spatie achter het laatste stramien komt van de ^^M
+\def\invoer: #1 {
+    \def\@probeerstramien ##1;{\csn ##1\ecs 
+        \message{Ik probeer het met opmaak: ##1}
+        \@installeertellers{##1}
+        \input \invoerpad#1.tex
+        \vfill\eject
+        \@bewaartellers{##1}
+        }
+    \the\@stramienlijst}
+
+%% uitloop van vorige output routine
+% iftempf: als pagina geen uitloop gebruikt, direct eventuele
+%          uitloop leeg gooien.
+% laatste pagina: tempboxa <- vbox{unvcopy255}
+% er wordt een pagina uitgeworpen:
+%    - 255 is void: invoer is op, dus uitlopen 
+%                   als dit de laatste pagina was
+%    - 255 non-void: er is iets terug te werpen; dit was kennelijk niet
+%                   de laatste pagina, dus geen uitloop.
+
+\newbox\@uitloop \newbox\@tempuitloop \newif\ifisereenuitloop
+    \Tmessage[out]{Aangetroffen uitloop: \the\ht\@uitloop+\the\dp\@uitloop}
+
+%-- uitloop
+% mag alleen in kop of voet voorkomen.
+\setbox\@tempuitloop=
+        \vbox{\ifvoid\topins\else\unvcopy\topins\fi
+              \unvcopy\@cclv\kern\z@}
+\setbox\@tempuitloop=\hbox{}
+\@PageGridOption{uitloop}{\tempfyes 
+    \@add@toks{\Tmessage[out]{Uitloop wordt verwerkt.}% 
+          \copy\@uitloop 
+          }}
+
+          \iftempd
+              \iftempc \Tmessage[out]{Eerste pagina, derhalve:}
+                       \@loopnietuit \else \@loopuit \fi
+          \else \Tmessage[out]{Niet de laatste pagina, derhalve:}
+                \@loopnietuit \fi
+
+          \iftempf \else \nxp\@uitloopwegwerpen \fi %geheugenbesparing.
+
+\def\@loopuit{\global\isereenuitloopyes 
+    \global\setbox\@uitloop=\box\@tempuitloop
+    \Tmessage[out]{Uitloop: \the\ht\@uitloop+\the\dp\@uitloop}}
+\def\@loopnietuit{\global\isereenuitloopno \@uitloopwegwerpen}
+\def\@uitloopwegwerpen{
+    \Tmessage[out]{Uitloop weggegooid: \the\ht\@uitloop+\the\dp\@uitloop}
+    \global\setbox\@uitloop=\hbox{}}
+
+%-- veld %% is deze nog nodig nu we 'tekstblok' generisch hebben?
+\@PageGridOption{veld}{
+    \eqstring{#1}{stop}%
+         {\@add@toks{\egroup}}%
+         {\@add@toks{\vtop\bgroup\kern0cm}
+          \eqstring{#1}{uitvullen}{}%
+                   {\@add@toks{\hsize=\w@w{#1}}
+                    \iftempc\advance\text@width-\w@w{#1}\fi}
+         }}
+%-- parallel Nog eens goed over nadenken.
+\@PageGridOption{parallel}{
+    \eqstring{#1}{stop}%
+         {\@add@toks{\vfil\egroup\egroup}}%
+         {\@add@toks{\vtop\bgroup\kern0cm
+                \vbox to \vsize\bgroup}% dit is fout.
+          \eqstring{#1}{uitvullen}{}%
+                {\iftempc\advance\text@width-\w@w{#1}\relax\fi
+                 \@add@toks{\hsize=\w@w{#1}}}
+          }}
+%-- kolommenbalanceren
+% heeft alleen zin voor meerkoloms uitvoer,
+% werkt alleen op laatste pagina
+\@PageGridOption{kolommenbalanceren}{
+    \eqstring{#1}{}{\tempgyes}{\csn tempg#1\ecs}}
+

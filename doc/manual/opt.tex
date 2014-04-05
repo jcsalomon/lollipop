@@ -1,0 +1,393 @@
+% Opt.tex copyright 1992 Victor Eijkhout
+%              copyright 2014 Vafa Khalighi
+%
+\Chapter Options
+
+This chapter discusses the various options that are common to all
+\Lollipop\ constructs.
+
+\Section Titles
+
+Any construct can have a title, although of course it is most useful
+for headings. 
+A construct has a title if the option \refopt{title} appears. 
+Example:
+\Ver>
+\DefineHeading:Section [...]
+    Style:bold title
+    [...] Stop<Rev
+
+will define a \cs{Section} macro that has a title. 
+The macro is then used as
+\Ver>
+\Section The title of this section
+
+Some text in this section.<Rev
+that is, the title is delimited by an empty line.
+
+The title is actually available as a macro \refcs{FooTitle}, so that you
+can write a macro, for instance
+\Ver>
+\def\ComplicatedTitle{ .. \hrule ... 
+    \vrule ... \vbox \bgroup ...
+    \FooTitle ...
+    }<Rev
+and use this macro instead of the \opt{title} option
+\Ver>\DefineBar:Foo ...
+    ComplicatedTitle
+    ... Stop<Rev
+However, since the option \opt{title} now doesn't appear anymore, it
+becomes necessary to specify explicitly that there is a title.
+This can be done with the \refopt{HasTitle} option. For instance,
+you define
+\Ver>\DefineBar:Foo ...
+    HasTitle
+    ComplicatedTitle
+    ... Stop<Rev
+where \cs{ComplicatedTitle} is a macro that formats the title.
+
+\SubSection Short titles
+
+The option \opt{HasTitle} can have a parameter \n{short}, denoting that
+the title is not delimited by an empty line (or \cs{par}) but by the
+line end. For an example see section~\ref[sec:address].
+
+\Section[sec:opt:counter] Counters
+
+There are three ways for Lollipop to figure out that a generic
+construct has a counter. First of all, in
+\Ver>\DefineFoo:Bar [...]
+    BarCounter [...]<Rev
+the \cs{BarCounter} will be defined automatically.
+
+Additionally there is the option \refopt{counter}, which can be used
+to declare the representation of the option, for instance
+\opt{counter:i} allocated a counter that is printed in lowercase roman
+numerals. For the available representations,
+see~\ref[sec:counter:repr].
+
+Finally, if the counter is only used in a macro, the
+option \refopt{HasCounter} will cause the counter to be created anyhow.
+This is analogous to the \opt{HasTitle} option.
+
+\SubSection Counter synonyms
+
+Every once in a while you may want different constructs to use the same
+counter. For instance, if your book has definitions, theorems, lemmas,
+corollaries and notations, it may confuse the reader if they all have
+their own counter. The numbering would seem to jump all over the place.
+
+A `counter synonym' can be declared in \Lollipop\ by a slight abuse of
+the \opt{counter} option.
+\Example
+\DefineTextBlock:Theorem counter:1 begingroup Style:bold
+ literal:Theorem Spaces:1 TheoremCounter Spaces:2 endgroup
+ text Stop
+\DefineTextBlock:Corollary counter:Theorem begingroup Style:italic
+ literal:Corollary Spaces:1 CorollaryCounter Spaces:2 endgroup
+ text Stop
+\DefineTextBlock:Definition counter:Theorem begingroup Style:roman
+ literal:Definition Spaces:1 DefinitionCounter Spaces:2 endgroup
+ text Stop
+\Definition We define a {\it Foo} to be an arbitrary object\>
+\Theorem Foos have arbitrary properties\>
+\Corollary Foos are extremely valuable\>
+\Corollary Foos are extremely worthless\>
+\Theorem Foos don't exist\>
+\ExampleStop
+
+You can only declare a counter to be synonym for something that has
+already been created. In the above example you cannot define the
+\cs{Theorem} after the \cs{Corollary}.
+
+\ImpNote
+At the start of defining the construct, \cs{BarCounter} is defined to
+be an option:
+\Ver>\add@generic@default{\has@counterno
+    \def\counter@repr{1}
+    \csarg\def{\gen@option@name{\@name Counter}}{%
+        \@add@toks{\@name Counter}\global\has@counteryes}}<Rev
+
+Then,
+\Ver>\add@generic@stop@default{\ifhas@counter
+    \xp\expandafter\xp\install@counter
+           \xp\counter@repr\@space\fi}<Rev
+
+
+The counter is stepped, and the new value is stored in a mark item,
+in \cs{outer@start@commands}:
+
+\Ver>
+    \ifhas@counter 
+       \nxp\StepCounter:\expandafter\@name\@space
+       % This sets the \current@label by default
+       \ifhas@marks \edef\nxp\cs@e
+              {\nxp\nxp\nxp\refresh@mark@item
+                {\@name Counter}{\CSname{\@name Counter}}}%
+            \nxp\cs@e      
+       \fi
+       \fi<Rev
+\ImpNoteStop
+
+\Section Chunks of text
+
+Especially in headings, short chunks of text may need a special
+treatment. For instance, the number may have to be filled to a certain
+width, or a line may have to be drawn of the exact length of the
+title. Lollipop have various general options (so they can also be used
+in other contexts than headings) for handling pieces of text.
+
+\SubSection[sec:opt:block] The \opt{block} option\label[opt:block]
+
+The \refopt{block} option takes up a piece of text and fits it on one
+line. It can measure the text, or set the size. Also there are a number
+of ways of placing a block.
+
+Basic usage:
+\Ver>    block:start [...] block:stop<Rev
+This takes the enclosed text, and reproduces it. This is mostly
+interesting in combination with \opt{textcolumn},
+see~\ref[sec:opt:textcolumn].
+\Ver>    block:hang [...] block:stop<Rev
+The resulting block is dropped until its top touches the baseline.
+For uniformity of appearance, the resulting width of the block can be
+specified:
+\Ver>    block:start [...] fillupto:20pt<Rev
+The name of a \cs{Distance} parameter can be used here.
+
+\Example
+\DefineHeading:TestHeading
+ line:start block:hang PointSize:8 SetFont 
+                  TestHeadingCounter fillupto:20pt
+            block:hang PointSize:14 SetFont title block:stop
+ line:stop Stop
+\TestHeading Top Aligning the Title
+
+\endExample
+
+The block is usually in between the margins of the text, but it can be
+made to stick out into the margin, by closing it with the option
+\refopt{stickout}.  For the left margin this done as
+ \Ver>    block:start [...] stickout:left<Rev
+and for the right margin
+ \Ver>    block:start [...] stickout:right<Rev
+The size of the box can be specified, for instance as
+ \Ver>    block:start [...] stickout:left=20pt<Rev
+For a left box the material in it is pushed to the left edge, for a
+right sticking box it is shifted to the right.
+
+\SubSection[sec:blockwidth] Block Measuring
+
+All blocks are immediately measured when they are placed. This makes it
+possible for instance to underline a title exactly. After a block has
+been placed, its width is available as \refcs{BlockWidth}.
+ \Example
+\def\rulespecs{height 1pt width \BlockWidth\relax}
+\DefineHeading:TestHeading Style:bold
+ line:start block:start TestHeadingCounter . Spaces:2 stickout:left
+            block:start title block:stop line:stop
+ vwhite:2pt hrule rulespecs vwhite:10pt Stop
+\TestHeading The Title Is Underlined
+
+The text follows.
+\ExampleStop
+Observe how a control sequence \cs{rulespecs} is used to sneak the
+height and width of the rule into the definition. This is necessary
+because control sequences are not allowed in a construct definition.
+
+\SubSection[sec:opt:line] The \opt{line} option
+
+The option \refopt{line} is used to create a single strip of text that
+fits exactly in between the margins of the page. Most of the time, titles
+will be in a line. 
+
+\Example
+\DefineHeading:TestHeading
+    line:start block:start TestHeadingCounter Spaces:1.5 stickout:left
+               title line:stop Stop
+\TestHeading A Title
+
+\endExample
+
+Another example was above. Here is another use of a line:
+
+\Example
+\DefineHeading:TestHeading
+    line:start TestHeadingCounter fillup title line:stop Stop
+\TestHeading The title
+
+\endExample
+
+\SubSection[sec:opt:textcolumn] The \opt{textcolumn} option
+
+In the examples above all titles fit on one line comfortably. If this
+is not the case, the title can be put in a \refopt{textcolumn} which can
+span several lines.
+
+\Example
+\DefineHeading:TestHeading
+    line:start block:start TestHeadingCounter Spaces:2 block:stop
+               textcolumn:topline title textcolumn:stop
+    line:stop Stop
+\TestHeading A very very very very very very very very very very very
+very very very very very very very very very very very very very
+very very very very very very very very long title
+
+\endExample
+
+This option is mostly interesting in combination with others such as
+\opt{block} and \opt{line}. As is apparent from the above example: a
+block placed in the same line as a text column will detract from the
+latter's width. 
+
+(In fact it is the other way around: \Lollipop\ sets
+the line with a text column of width zero to determine the remaining
+space. Then the line is set again. This may give problems if you
+manipulate parameters inside the line, because the line is in effect
+typeset twice. Also make sure not to have other \cs{vbox}-es in the
+line than the text column.)
+
+\SubSection[sec:opt:traps] Traps
+
+It is a bad idea to have material in headings and such that is not
+inside a block, textcolumn, or line. For instance:
+
+\Example
+\DefineHeading:TestHeading
+    block:start TestHeadingCounter Spaces:2 block:stop
+    title Stop
+\TestHeading Where does the title go?
+
+\endExample
+
+\Section[sec:opt:label] Labels
+
+References to any counter will always be correct, no matter if that
+counter has changed after retypesetting the document, if symbolic
+references are used. Referencing is explained in detail in
+chapter~\ref[chap:referencing].
+
+The way a symbolic reference is formatted can be altered from the
+default (just give the counter) by using the \refopt{label} option.
+\Ver>\DefineHeading:TestSection
+ line:start Style:italic TestSectionCounter Spaces:2 title line:stop
+ label:start ( TestSectionCounter ) label:stop Stop<Rev
+See further section~\ref[sec:shape:reference].
+
+
+\Section[sec:opt:penalties] Break before / after
+
+The options \refopt{breakbefore} and \refopt{breakafter} control how
+eager \TeX\ will be to break the page before or after a construct. These
+options take one value, a so-called `penalty' value, meaning that the
+higher the value you specify, the higher the penalty is, and
+therefore the less likely it is that the page will be broken there.
+
+Numerical values are typically in the tens or hundreds; any value
+of \n{10$\,$000} or more means that there will never be a break at
+that point; a value of \n{-10$\,$000} or less means a guaranteed
+break. If you don't want to remember these rules, values of \n{yes}
+and \n{no} mean a guaranteed break, and no break respectively.
+
+\WizNote
+A further exceptional value is \n{breakbefore/after:0}, this will
+cause no penalty to be placed. The reason for this is highly \TeX
+nical.
+\>
+
+\Section[sec:opt:indent] Indentation
+
+The option \refopt{indentafter} controls the behaviour of the first
+paragraph after a generic construct., \refopt{indentinside},
+\refopt{indentfirst}.
+
+\Section Rules
+
+There is an option \refopt{hrule}. You should not write
+\Ver>\def\rulemacro{\hrule height [...] }
+\DefineHeading [...] rulemacro [...] Stop<Rev
+because then \Lollipop\ cannot prevent page breaks around the rule.
+Instead write 
+\Ver>\def\rulespecs{ height [...] }
+\DefineHeading [...] hrule rulespecs [...] Stop<Rev
+so that the option \opt{hrule} is used. See
+section~\ref[sec:blockwidth] for an example.
+
+\Section Embedded constructs
+
+Most generic constructs will be vertically separated from the
+surrounding text. However, in rare cases (and for unusual applications)
+it be desired to have a construct that is part of a paragraph. For this
+the option \refopt{embedded} exists.
+
+This option has the following values.
+\Ver>    embedded:no<Rev
+This is the default.
+\Ver>    embedded:left<Rev
+The construct continues an already started paragraph, but after the
+construct a vertical break follows.
+\Ver>    embedded:right<Rev
+After the construct a paragraph can continue, but the construct is
+separated vertically from preceding text.
+\Ver>    embedded:yes<Rev
+The construct is both left and right embedded.
+
+Embedding a construct has an interesting application to generating
+indexes. (See chapter~\ref[chap:external-files] for general information
+about external files.) This can be done by having embedded headings
+that write their title to the index file.
+
+\Example
+\DefineExternalFile:tIndex=tix
+\DefineHeading:NewWord embedded:yes 
+ block:start Style:bold title block:stop
+ external:tIndex title external:stop Stop
+\def\introword#1{\NewWord #1\par}
+In this sentence two \introword{flubrious} words are
+\introword{stinselsed}.
+\ExampleStop
+
+Cute, ain't it?
+
+A word of warning though. Headings and such generate \TeX\ `marks'
+which take up main memory. You only need these if you are going
+to be referring to that object with \cs{LastPlaced} or such; see
+section~\ref[sec:head/foot]. Embedded headings used as above
+usually don't need these marks, so you can prevent \TeX\ overflow by
+putting the option \opt{nomarks} in their definition.
+
+\Section Obscure options
+
+\SubSection Arguments
+
+In case you want to interface to other macro packages, you may want to
+let a construct generate a call to the other package. For this, the
+\Lollipop\ macro should be able to produce sequences such as
+\ver>\begin{itemize}>. The problem here is the braces. The option
+\refcs{arg} produces a braced expression.
+
+For instance
+\Ver>\DefineTextBlock:LaTeXlist begin arg:{itemize} text
+    end arg:{itemize} Stop<Rev
+makes it possible to use call \LaTeX\ macros from \Lollipop.
+
+\SubSection[sec:implicit:close] Implicit closing
+
+The control sequence \refcs{>} closes the current group, and \refcs{>]}
+closes all currently open groups. Every once in a while this is too
+drastic. Hence there is an option \refopt{noimplicitclose} that can be
+used to prevent a construct from being closed implicitly. Using \cs{>]}
+inside such a construct will close all enclosed constructs.
+
+See the definition of \cs{EExample} in this manual for an example.
+
+\Section[sec:opt:test] Testing
+
+There is an option \opt{test}.
+
+\endinput
+
+92/11/10 \BlockWidth discussed in 'block' section
+92/11/15 counter:othercounter discussed
+92/11/21 option 'arg'
+

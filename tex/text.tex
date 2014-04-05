@@ -1,0 +1,466 @@
+% Text.tex copyright 1992 Victor Eijkhout
+% copyright 2014 Vafa Khalighi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Text Blocks
+
+\@GenericConstruct{TextBlock}
+
+% commands can be before and after text
+% store in two token lists
+% switch from one to other by option 'text'
+% this may also be used by ParagraphShape
+%
+\add@TextBlock@default{
+    \def\@current@options@list{before@coms}
+    \def\switch@lists{\at@breakpointyes
+        \def\@current@options@list{after@coms}}
+    }
+\@TextBlockOption{text}{\switch@lists}
+
+\def\@DefineTextBlock{
+    \csarg\edef{\@name}{\@gen@open
+        \the\before@coms
+        }
+    \@DefineStopCommand{\the\after@coms \@gen@close}
+    }
+
+    
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% A L I N E A V O R M E N
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% via \everypar:
+% \everypar={\@everyeverypar { ...locaal spul...
+%                              \def\par{... \@par\egroup}
+\@GenericConstruct{ParagraphShape}
+
+%%%%!!!!!!!!!!!!!!!!
+% not functioning.
+% note: \@defaulteverypar is installed now
+% as a start@command!
+
+%% anonieme namen
+% \iftempa : moet dit inspringen
+% \iftempb : speciale behandeling staart?
+
+\def\@ParagraphShapeverstekwaardes{
+    \tempano \tempbno
+    \temptoksb={} \temptoksc={}
+    \def\cs@d{b}\def\@current@options@list{temptoks\cs@d}
+    }
+\def\@DefineParagraphShape{
+    \csarg{\edef}{\@name}{%
+          \CSname{AltijdInspringen\iftempa yes\else no\fi}%
+          \nxp\everypar={\nxp\@everyeverypar
+              \iftempb \bgroup \fi
+              \the\temptoksb 
+              \iftempb \parfillskip\z@ 
+                  \else \if@erislinkswit \parfillskip\z@ \fi\fi
+              \relax
+              \iftempb \def\nxp\par{\nxp\unskip\nxp\nobreak\the\temptoksc 
+                                  \hbox{}\nxp\@par\egroup}\fi
+         }}              }
+
+\@ParagraphShapeNOOP{verticaal}
+
+%-- inspringen
+\@ParagraphShapeOption{inspringen}{
+    \if\EqualString{#1}{no}\else\tempayes\fi}
+
+%-- tekst
+\@ParagraphShapeOption{tekst}{\tempbyes\def\cs@d{c}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% U T I L I T I E S
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%% Space, white space
+%
+% unit space \@@space is set by switching font style
+%
+\newdimen\@@space \@@space=.5em
+\def\Spaces:#1 {\hskip#1\@@space}
+
+% handig voor bibliografieen
+\def\lax{\tolerance\@m \hfuzz\p@}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%
+% White space
+%
+\NewTrace:skip
+
+\def\hwhite:#1 {\@hwhite{#1}}
+\def\@hwhite#1{\ifhmode\unskip\fi\relax 
+    \if\EqualString{#1}{fillup}\hfill\else\hskip\@ww{#1}\relax\fi}
+
+% Vertical
+% subtle: argument should be placed even if
+% size is equal: stretch may be different,
+% probably more. (cf \par\vwit{0pt plus 1fil} )
+%
+\def\vwhite:#1 {\@vwhite{#1}}
+\@GenericOption{vwhite}{\protect@breakpoint
+    \@add@toks{\@vwhite{#1}}\at@breakpointno}
+\def\@vwhite#1{\tempskipa=\@ww{#1}\relax \tempskipb\lastskip
+    \Tmessage[skip]{Considering vskip \the\tempskipa}%
+    \ifvmode \ifdim\tempskipb>\tempskipa
+             \Tmessage[skip]{Ignored. (lastskip=\the\tempskipb)}%
+          \else \Tmessage[skip]{Backvspacing \the\tempskipb}%
+             \vskip-\tempskipb 
+             \Tmessage[skip]{Vskip \the\tempskipa}%
+             \vskip\tempskipa \fi
+    \else \if\EqualString{#1}{fillup}\hfill
+          \else\vskip\tempskipa \fi
+    \fi}
+
+% advance skip by literal or name of control sequence
+\def\advance@skip#1#2{\advance#1\@ww{#2}\relax}
+
+% only backspace the previous; 
+% in this case prevent creating a breakpoint
+% if there was no glue
+%
+\def\v@buffer#1{\tempskipa=\@ww{#1}\relax \tempskipb\lastskip
+    \Tmessage[skip]{Clearing for vskip \the\tempskipa}%
+    \ifvmode \ifdim\tempskipb>\tempskipa 
+        \else \ifdim\tempskipb=\z@ 
+            \else \vskip-\tempskipb\relax 
+                  \Tmessage[skip]{Backspaced}\fi
+    \fi \fi}
+\def\unhskip{\ifhmode\unskip\fi}
+\def\leavehmode{\unvbox\voidb@x}
+\def\novbreak{\leavehmode\nobreak}
+
+\def\white:#1 {\@white{#1}}
+\@GenericOption{white}{\protect@breakpoint
+    \@add@toks{\@white{#1}}\at@breakpointyes}
+\def\@white#1{\ifhmode\@hwhite{#1}\else
+    \ifvmode\@vwhite{#1}\fi\fi}
+\def\fillup{\@white{0pt plus1fill}}
+
+\def\@@distance#1{\csarg\newskip{#1}}
+\def\Distance:#1=#2
+   {\if\UndefinedCS{#1}\@@distance{#1}\fi
+    \edef\cs@e{\global\noexpand\set@value{#1}%
+               \if\UndefinedCS{#2}{#2}%
+               \else \CSname{#2}\fi}
+    \cs@e}
+\def\AdaptiveDistance:#1=#2 {\Distance:#1=#2
+    \adds@stop@command
+      {\ifWriteExtern\immediate\write\aux@file
+         {\string\Distance:#1={\xp\the\csn#1\ecs}}\fi
+         }}
+
+\Distance:filler={0pt plus 1fil}
+\parindent=30pt
+\parskip=0pt
+\parfillskip=0cm plus 1 fil
+\baselineskip=12pt
+
+%%%%%%%%%%%%%%%% Rules
+\@GenericOption{rule}{
+    \if\EqualString{#1}{h}\protect@breakpoint
+         \@add@toks{\hrule#2\relax}
+         \at@breakpointyes
+    \else\if\EqualString{#1}{v}\@add@toks{\vrule#2\relax}
+         \else\Wmessage{Strange option: <rule:#1=#2>}
+    \fi  \fi}
+\@GenericOption{hrule}{\protect@breakpoint
+    \@add@toks{\hrule}\at@breakpointyes}
+\@GenericOption{vrule}{\@add@toks{\vrule}}
+
+%%%%%%%%%%%%%%%% Indentation Control
+% default value for all paragraphs set by AlwaysIndent
+% this one is set by by the user,
+% or by 'indentinside' option of paragraph shapes
+%
+\DefineTest:AlwaysIndent
+\AlwaysIndent:yes
+
+% override by Indent
+% can be set by the user,
+% or by start/end of text constructs
+%
+\DefineTest:Indent       %forceer/onderdruk inspringen
+
+% Remove indentation
+% this is executed by \every@everypar
+%
+\def\controlled@indentation
+   {\ifAlwaysIndent
+          \ifIndent \else \remove@indent \Indent:yes \fi
+    \else \ifIndent \Indent:no \else \remove@indent \fi
+    \fi}
+\def\remove@indent{{\setbox0=\lastbox}}
+
+\def\noindentation{\AlwaysIndentno \Indentno}
+
+% Indentation control in Universal Block
+% control sequences \first@indent \inside@indent \after@indent
+% are called (in \edef context) in general open/close macros
+% for universal environments
+
+% Indent after this block
+% \global because the block may be in a further group
+%
+\add@generic@default{\def\after@indent{\global\nxp\Indent:no }}
+\@GenericOption{indentafter}{
+    \def\after@indent{\global\nxp\Indent:#1 }}
+
+% Indent in this block
+\add@generic@default{\def\inside@indent{}}
+\@GenericOption{indentinside}{
+    \def\inside@indent{\nxp\AlwaysIndent:#1 }}
+
+% Indent first in this block
+\add@generic@default{\def\first@indent{\nxp\Indent:no }}
+\@GenericOption{indentfirst}{
+    \def\first@indent{\nxp\Indent:#1 }}
+
+%%%% Level dependent indentation
+%
+\NewTrace:indent
+
+% Lots of commands and parameters
+%
+% \levelindent is the indentation that will be taken
+%    on the current level, jumping to the next
+%
+\newdimen\levelindent 
+
+% \previousindent is the indentation that got us to this level
+%    list item labels have to outdent over this amount
+%
+\newdimen\previousindent \previousindent\z@
+
+% indentlevel counter: used to generate automatic indentation,
+%    for instance \levelindentvi for level vi
+%
+\new@@counter{indentlevel}
+\set@counter{indentlevel}1
+
+% \set@level@indent : set \levelindent to automatically
+%    generated indentation; if \levelindentiii is defined take it,
+%    otherwise use \@@level@indent{3}, which uses fraction
+%    of a \basicindent
+%
+\def\set@level@indent{\levelindent=
+    \level@indent{\cs@counter@name{indentlevel}}}
+\def\level@indent
+ #1{\if\UndefinedCS{\@level@indent{#1}}\@@level@indent{#1}%
+    \else \csname \@level@indent{#1}\endcsname \fi}
+\def\@level@indent#1{levelindent\romannumeral#1}
+\def\@@level@indent#1{\ifcase#1\z@\or
+ \basicindent \or .75\basicindent \else .5\basicindent \fi}
+
+\DefineTest:BasicIndentIsSet
+% the following lines appear as the last command in \Start,
+% so that the user can tinker with \parindent
+% through adaptive distances or in the style
+%\ifBasicIndentIsSet\else\Distance:basicindent=parindent\fi
+%\set@level@indent
+
+% \SetLevelIndent : set exact amount of indentation for
+%    specific level
+%
+\def\LevelIndent:#1=#2 {\csarg\edef{\@level@indent{#1}}{\@ww{#2}}}
+
+% Push/Pop indentlevels
+%
+\def\PushIndentLevel
+   {\Tmessage[indent]{Old indent: \the\leftskip}%
+    \advance\leftskip\levelindent 
+    \previousindent=\levelindent
+    \step@counter{indentlevel}\set@level@indent
+    \Tmessage[indent]{New indent: \the\leftskip, 
+                      at level \the\cs@counter@name{indentlevel}}%
+    }
+
+% Popping an indent level requires two pops: one for the \levelindent
+% and one for the \previousindent. This last one then has to be 
+% pushed again.
+%
+\def\PopIndentLevel
+   {\ifnum\cs@counter@name{indentlevel}=\@ne
+        \Emessage{Pop indent level attempted at outer level}
+    \else \back@step@counter{indentlevel}%
+        \back@step@counter{indentlevel}%
+        \set@level@indent \previousindent\levelindent
+        \step@counter{indentlevel}%
+        \set@level@indent\advance\leftskip-\levelindent
+    \fi}
+
+%%%%%%%%%%%%%%%% Paragraph Skip control
+% parskip is stored and set to zero at the start and end
+% of environments
+\newskip\@restoreparskip 
+
+% it is recorded if a parskip has been stored
+%
+\newif\if@parskipsaved \@parskipsavedno
+
+% Do no parskip
+% used at start of environment
+%
+\def\hold@parskip
+   {\@restoreparskip\parskip \parskip\z@ \@parskipsavedyes}
+
+% Hold off parskip
+% used at end of environment
+%
+\def\dono@parskip{\if@parskipsaved \else \hold@parskip \fi}
+
+% Reestablish the parskip
+% this is executed in \every@everypar
+%
+\def\controlled@parskip
+   {\if@parskipsaved \@parskipsavedno 
+        \parskip\@restoreparskip
+    \fi}
+
+\def\noparskip{\parskip\z@ \@restoreparskip\z@}
+
+%%%%%%%%%%%%%%%% Every Paragraph
+% \everypar is supposed to contain \every@everypar
+% as its first element.
+%
+\def\every@everypar{\controlled@indentation \controlled@parskip
+    \one@shot@coms \@headedno}
+\def\default@everypar{\everypar={\every@everypar}}
+\add@start@command{\default@everypar}
+\everypar{\Emessage{You forgot to give the \nxp\Start\@space command.}}
+
+% Execute once
+%
+\newtoks\one@shot@toks
+\def\one@shot@coms{\temptoksa\one@shot@toks 
+    \global\one@shot@toks={}\the\temptoksa\temptoksa{}}
+\def\next@paragraph#1{\append@to@list{one@shot@toks}{#1}}
+
+%%%%%%%%%%%%%%%% Every Math
+% just like \everypar.
+%
+\newtoks\every@everymath \newcount\high@fam
+\every@everymath{\high@fam\count18\relax
+    %\MainFace
+    \xp\math@setsize\style@sizes}
+\everymath{\the\every@everymath}
+\everydisplay{\the\every@everymath}
+
+% Flush margins
+%
+\Distance:rightmarginstretch={0pt plus 6cm}
+\Distance:leftmarginstretch={0pt plus 6cm}
+\def\FlushLeft:#1 {\switch {\if\EqualString{#1}}
+    {yes} {\leftskip=1\leftskip}
+    {default} {\leftskip=1\leftskip
+               \advance\leftskip\leftmarginstretch}
+    \endswitch \relax}
+\FlushLeft:yes
+\def\FlushRight:#1 {\switch {\if\EqualString{#1}}
+    {yes} {\rightskip=1\rightskip}
+    {default} {\rightskip=1\rightskip
+               \advance\rightskip\rightmarginstretch}
+    \endswitch \relax}
+\FlushRight:yes
+
+%%%%%%% lijn
+% #1 : hoogte; #2 : lengte; #3 : elevatie
+% parameters kunnen van achter af aan weggelaten worden;
+% #4 is dummy, kan niet door de gebruiker gespecificeerd worden.
+% NNNNNNNNNBBBBBBBBBBBBB: #2 werkt nog niet!!!!!!!!!!!!
+\newtoks\@lijntoks
+\@lijntoks={}
+
+% Lijn. Hier moet ik nog eens naar kijken.
+\@GenericOption{lijn}{
+    \edef\cs@e{\nxp\lijnanalyse:#1:\@restarg::::;}\cs@e
+    \edef\cs@e{\nxp\@add@toks{\nxp\leavevmode\the\@lijntoks}}
+    \cs@e}
+
+\def\lijnanalyse:#1:#2:#3:#4;{\@lijntoks={}
+    \eqstring{#1}{}{}{\achteraanlijst{@lijntoks}{height #1 }}
+    \eqstring{#2}{}{\vooraanlijst{@lijntoks}{\leaders\hrule depth 0cm }
+                    \achteraanlijst{@lijntoks}{\hfill}}%
+                   {\eqstring{#2}{uitvullen}%
+                    {\vooraanlijst{@lijntoks}{\leaders\hrule depth 0cm }
+                     \achteraanlijst{@lijntoks}{\hfill}}%
+                    {\achteraanlijst{@lijntoks}{width \w@w{#2} }%
+                     \vooraanlijst{@lijntoks}{\vrule depth 0cm }}
+%    \eqstring{#3}{}{}{\vooraanlijst{@lijntoks}{\raise #3\hbox\bgroup}
+%                      \achteraanlijst{@lijntoks}{\egroup}}
+                   }
+    \achteraanlijst{@lijntoks}{\hbox{}} % \par doet \unskip!!!
+    }
+    
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% accenten
+\gdef\allowhyphens{\penalty\@M \hskip\z@\relax}
+
+{\catcode`\"=12 \gdef\hex{"}}
+
+\catcode`\"=13
+\def "#1{\ifx#1i\discretionary{-}{i}{{\accent'177 \i}}%
+    \else\ifx#1-\allowhyphens-\penalty\z@\allowhyphens
+    \else\ifx#1"\hskip\z@\relax
+    \else\ifx#1!\hex
+    \else\ifx#1|\allowhyphens
+    \else {\accent'177 #1}\fi\fi\fi\fi\fi}
+      
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+%%%%%%%%%%%%%%%%%% C A S E
+%% 
+\def\UpperCase#1{\edef\cs@a{\uppercase{#1}}\cs@a}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%% L E T T E R S P A C I N G
+%% 
+\def\LetterSpace
+   {\ifnextchar[\@LetterSpace %] <- to fool emacs
+               {\@LetterSpace[0ptplus1fil]}}
+\def\@LetterSpace[#1]#2{\def\@LS{\hskip#1\relax}%
+    \edef\cs@e{#2}\xp\@@LS\cs@e&}
+\def\@@LS#1#2&{#1\if\IsEmptyList{#2}\xp\take@one\else\@LS\xp\@@LS\fi#2&}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%% Interdictions
+%% 
+\def\NoHyphenation{\hyphenpenalty\@M \exhyphenpenalty\@M}
+\def\NoWidows{\widowpenalty\@M}
+\def\NoOrphans{\clubpenalty\@M}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+%%%%%%%%%%%%%%%%%% V E R B A T I M
+%% 
+
+\def\setupverbatim{\let\do=\makeother \dospecials}
+
+%% inline verbatim
+\def\ver{\leavevmode\begingroup \setupverbatim \obeyspaces\tt \@ver}
+\def\@ver#1{\def\@@ver##1#1{##1\endgroup}\@@ver}
+
+%% display verbatim
+{\activecr %
+ \gdef\vVer>{\setupverbatim \obeyspaces %
+      \tt \parindent\z@ \noparskip \obeylines %
+      \ifnextchar
+      \@@Ver\@Ver}\noeol %
+ \gdef\@Ver#1<Rev{#1\VerStop}%
+ \gdef\@@Ver
+    #1<Rev{#1\VerStop}}
+
+%% verbatim files
+\def\verbatimfile#1{\begingroup
+    \setupverbatim \obeyspaces \parindent\z@ \noparskip \obeylines %
+    \tt \input#1\relax
+    \endgroup}
+
+\endinput
+
+92/11/08 white options created;
+     breakpoint protection in white options
+92/11/18 AdaptiveDistance implemented
+92/11/20 \set@counter calls updated for \w@w use
+92/12/14 default flush right

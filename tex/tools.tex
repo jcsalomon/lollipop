@@ -1,0 +1,1491 @@
+% Tools.tex copyright 1992/3 Victor Eijkhout
+%                copyright 2014 Vafa Khalighi
+
+%% anonymous control sequences
+\newif\iftempa \newif\iftempb \newif\iftempc \newif\iftempd
+
+\newdimen\tempdima \newdimen\tempdimb \newdimen\tempdimc
+
+\newskip\tempskipa \newskip\tempskipb \newskip\tempskipc
+
+\newcount\tempcounta \newcount\tempcountb \newcount\tempcountc
+
+\newbox\tempboxa \newbox\tempboxb \newbox\tempboxc \newbox\tempboxd
+
+\newtoks\temptoksa \newtoks\temptoksb \newtoks\temptoksc
+%\newtoks\temptoksd \newtoks\temptokse \newtoks\temptoksf
+
+%% auxiliaries
+\def\@meld#1{{\immediate\write16{\trace@prefix #1}}}
+\def\Dmessage#1{\ifDiagnose \@meld{#1}\fi}
+\def\Wmessage#1{\@meld{--- Warning: #1}}
+\def\Emessage#1{{\errorcontextlines\m@ne
+    \errmessage{<><><><><><><><> #1 <><><><><><><><>}}}
+
+\showboxdepth=7 \showboxbreadth=20
+\newlinechar=`\^^J %nodig?
+
+\chardef\busje`\\
+\def\cs#1{{\tt\char\busje#1}}
+
+\let\xp\expandafter \let\nxp\noexpand
+\let\csn\csname \let\ecs\endcsname
+
+% Remove or select tokens
+% is used in several places
+%
+\long\def\id@#1{#1}
+\long\def\take@former#1#2{#1} \long\def\take@latter#1#2{#2}
+\long\def\take@one#1{} \long\def\take@two#1#2{}
+\long\def\take@three#1#2#3{}
+\long\def\keep@one#1{#1} \long\def\take@to@dollar#1${}
+\def\Xignorespaces#1{#1}
+
+{\noesc 
+\xp\xp\xp\gdef\xp\xp\xp\meaning@take@zero
+   \xp\string\csn macro:\xp\xp\xp\xp\xp\xp\xp\ecs
+   \xp\xp\xp\xp\xp\xp\xp#\xp\xp\xp1\xp\string\csn->\ecs{}
+}\def\real@meaning{\xp\meaning@take@zero\meaning}
+
+\def\first@of@three#1#2#3{#1}
+\def\second@of@three#1#2#3{#2}
+\def\third@of@three#1#2#3{#3}
+\def\first@two@of@three#1#2#3{{#1}{#2}}
+
+
+% Check if this file is being loaded from IniTeX, or
+% by \input'ting on top of an already existing format.
+% This is to avoid double definitions and major accidents.
+% 
+\def\lolli@name{Lollipop}
+\expandafter\ifx\csname fmtname\endcsname\lolli@name
+    \let\ifini\take@one
+    \let\ifnin\keep@one
+    \message{! Loading Lollipop on top of format !}
+\else
+    \let\ifini\keep@one %iniTeX run or on top of plain TeX
+    \let\ifnin\take@one
+    \everyjob{\let\ifini\take@one\let\ifnin\keep@one}
+\fi
+
+%%%%%%%%%%%%%%%% forward definitions
+\def\new@@counter#1{\csarg\newcount{\counter@name{#1}}}
+\def\counter@name#1{#1@C}
+
+%%%%%%%%%%%%%%%% Special characters
+
+% At sign
+%
+
+\def\makeatletter{\catcode`\@=11\relax}
+\def\makeatother{\catcode`\@=12\relax}
+
+% Catcode (re)storing
+%
+\def\storecat#1%
+   {\noesc
+    \csarg\edef{restorecat\string#1}%
+          {\catcode`\string#1=
+                \the\catcode\expandafter`\string#1}%
+    \catcode\expandafter`\string#1=12\relax
+    \normalesc}
+\def\restorecat#1%
+   {\noesc
+    \csname restorecat\string#1\endcsname
+    \normalesc}
+
+% save writing.
+
+\def\@space{ }\def\@empty{} \newtoks\empty@toks \empty@toks{}
+\def\sc@led{scaled}
+\def\nl{\hfil\break}
+\def\IniTeX{Ini\TeX}
+\def\LaTeX{L\kern-.3em\raise.35ex\hbox{\script A}\kern-.1em\TeX}
+\def\AmsTeX{$\cal A_MS$-\TeX}
+%my old def
+%\def\LamsTeX{L\kern-.2em\raise.4ex\hbox
+%   {$\scriptstyle\cal A$}\kern-.2em$\cal_M$\kern-.2em$\cal S\,$\TeX}
+%Spivak's old def
+%\def\LamSTeX{L\kern-.4em\raise.3ex\hbox{$\ssize\Cal A$}\kern-.25em
+% \lower.4ex\hbox{\eightsy M}\kern-.1em{$\Cal S$}-\TeX}
+\def\LamsTeX{L\kern-.4em\raise.3ex\hbox{\script$\cal A$}\kern-.25em
+ \lower.4ex\hbox{\script$\cal M$}\kern-.1em{$\cal S$}-\TeX}
+
+\def\CorporateLogo{\TeX\kern-.15em \raise.5ex\hbox{T}\kern-.25em
+             ECHNIQUE}
+
+
+\hsize=15cm 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% T O O L S %%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Construct a control sequence inside \edef
+%
+\def\CSname#1{\expandafter\noexpand\csname#1\endcsname}
+
+% Construct a control sequence out of #2, and give it to #1
+%
+\def\csarg#1#2{\expandafter#1\csname#2\endcsname}
+
+% Pick an escapecharacter
+% this presumes that its argument is a character.
+%
+\def\pickescape#1{\ifnum`#1=\escapechar\else#1\fi}
+
+% Equality of strings.
+% the fast approach: does not work in expansion-only environment.
+%
+\def\EqualString#1#2{00\fi\def\eqs@a{#1}\def\eqs@b{#2}%
+    \ifx\eqs@a\eqs@b}
+
+% Test by expansion only
+%
+\def\EqualStringX#1#2{00\fi
+    \csname if\@EqualStringX#1&$#2&$\endcsname}
+\def\@EqualStringX#1#2$#3#4${\ifx#1#3%
+        \ifx#1&true\else\hop@ES\@EqualStringX#2$#4$\fi
+    \else false\fi}
+\def\hop@ES#1\fi#2\fi{\fi\fi#1}
+
+% Lexicographic ordering
+% note the use of \def
+% also note the characters 0,127,255 that are used,
+% these are not supposed to appear in the strings
+%
+{\catcode0=12 \catcode255=12 \catcode127=12
+\gdef\StringBeforeNC#1#2{\00\fi
+  \CharsBefore#1^^@^^?#2^^ff^^?}
+\gdef\CharsBeforeNC#1#2^^?#3#4^^?{%
+  \ifcat#1\relax\def\next{\CharsBefore#2^^@^^?#3#4^^ff^^?}%
+  \else\ifcat#3\relax\def\next{\CharsBefore#1#2^^@^^?#4^^ff^^?}%
+       \else\ifnum\lccode`#1<\lccode`#3
+              \def\next{\csname iftrue\endcsname}%
+            \else\ifnum\lccode`#1>\lccode`#3
+                   \def\next{\csname iffalse\endcsname}%
+                 \else\def\next{\CharsBefore#2^^?#4^^?}%
+  \fi  \fi  \fi  \fi
+  \next}
+\gdef\StringBefore#1#2{\00\fi
+  \CharsBefore#1^^@^^?#2^^ff^^?}
+\gdef\CharsBefore#1#2^^?#3#4^^?{%
+  \ifnum`#1<`#3
+       \def\next{\csname iftrue\endcsname}%
+  \else\ifnum`#1>`#3
+       \def\next{\csname iffalse\endcsname}%
+       \else\def\next{\CharsBefore#2^^?#4^^?}%
+  \fi\fi
+  \next}
+}
+
+
+% Null argument test
+%
+\def\ifempty#1{00\fi\xp\ifx\csname#1null\endcsname\null}
+\def\ifEmptyX#1{\xp\ifx\csname#1null\endcsname\null}
+%\def\ifEmpty#1{\def\cs@a{#1}\ifx\cs@a\empty}
+\def\IsEmptyList#1{00\fi\def\cs@a{#1}\ifx\cs@a\empty}
+
+% Next character test
+%
+\def\NextChar#1#2#3{00\fi
+    \let\nxt@ch#1\def\nxt@a{#2}\def\nxt@b{#3}%
+    \futurelet\nxt@c\@ifnxtc}
+\def\ifNextChar#1#2#3{%
+    \let\nxt@ch#1\def\nxt@a{#2}\def\nxt@b{#3}%
+    \futurelet\nxt@c\@ifnxtc}
+\let\ifnextchar\ifNextChar
+\def\@ifnxtc{\ifx\nxt@ch\nxt@c \expandafter\nxt@a 
+    \else \expandafter\nxt@b \fi}
+
+% Test for defined-ness of string as control sequence.
+% works inside \edef
+%
+%outdated: \def\ifnotdefined#1{\csarg\ifx{#1}\relax}
+\def\UndefinedCS#1{00\fi\csarg\ifx{#1}\relax}
+
+% Define uniquely defined dummy macros,
+% usually to serve as bumper blocks at the end of a list
+%
+\newcount\dummies
+\def\NewDummy#1{
+    \if\UndefinedCS{#1}\csarg\edef{#1}{dum\the\dummies}
+        \advance\dummies\@ne
+    \else
+        \ifini{\Wmessage{Attempt at second definition of `#1'}}
+    \fi}
+
+% string case statement
+% use: \switch \iftest{...} in:
+%      item1 action1
+%      ...
+%      itemn actionn
+%      default defaultaction [optional]
+%      \endswitch
+% inspired by Jonathan Fine: Some Basic Control Macros
+% Tugboat 12 #4
+%
+\let\@fi\fi \let\endswitch\relax \NewDummy{default}
+\def\switch@exit #1 \@fi #2 \endswitch {\fi #1}
+\def\switch #1#2#3{\csarg\ifx{#2}\default\switch@exit #3 \@fi
+  #1{#2}\switch@exit #3 \@fi
+  \switch {#1}
+}
+% this version puts the test object in {}
+\def\oswitch #1 in: #2 #3; {\csarg\ifx{#2}\default\switch@exit #3 \@fi
+  #1{#2}\switch@exit #3 \@fi
+  \switch #1 in:
+}
+% this version assumes that the test object is just one character
+\def\cswitch #1 in: #2 #3; {\csarg\ifx{#2}\default\switch@exit #3 \@fi
+  #1#2\switch@exit #3 \@fi
+  \cswitch #1 in:
+}
+% this version assumes that the test object can have an optional space
+\def\bswitch #1 in: #2 #3; {\csarg\ifx{#2}\default\switch@exit #3 \@fi
+  #1#2 \switch@exit #3 \@fi
+  \bswitch #1 in:
+}
+% this version can cope with significant spaces at the start of #3;
+% #2 is macro argument
+\def\mswitch #1 in: #2:#3; {\csarg\ifx{#2}\default\switch@exit #3 \@fi
+  #1{#2}\switch@exit #3 \@fi
+  \mswitch #1 in:
+}
+% idem; #2 does not have to be enclosed in braces
+\def\fswitch #1 in: #2:#3; {\csarg\ifx{#2}\default\switch@exit #3 \@fi
+  #1#2 \switch@exit #3 \@fi
+  \fswitch #1 in:
+}
+
+% Routines for taking the value of a string: 
+% if the string is defined as control sequence
+% take the value of that, otherwise take the string itself
+
+% String or value of control sequence
+%
+\def\w@w#1{\if\UndefinedCS{#1}#1\else \the\csname#1\endcsname\fi}
+
+% String or control sequence
+%
+\def\@ww#1{\if\UndefinedCS{#1}#1\else \csname#1\endcsname \fi}
+
+% String or \noexpand-ed control sequence;
+% for use in \edef
+%
+\def\@w@w#1{\if\UndefinedCS{#1}#1\else 
+            \ifin@label\noexpand\protect\fi \CSname{#1}\fi}
+\newtoks\are@these@correct
+\def\t@w@w#1{%
+    \if\UndefinedCS{#1}#1%
+        \ifdefining\append@to@list\are@these@correct{#1 }\fi
+    \else 
+        \ifin@label\noexpand\protect\fi \CSname{#1}\fi}
+% see below what happens to \are@these@correct
+
+% Allocation
+%
+\def\new@count#1#2{\csarg\newcount{#1}\global\set@value{#1}{#2}}
+\def\new@skip#1#2{\csarg\newskip{#1}\global\set@value{#1}{#2}}
+\def\new@dimen#1#2{\csarg\newdimen{#1}\global\set@value{#1}{#2}}
+
+% Assignment of Values
+%
+\def\set@value#1#2{\csname#1\endcsname #2\relax}
+\def\increase@value#1#2{\advance\csname#1\endcsname #2\relax}
+\def\decrease@value#1#2{\advance\csname#1\endcsname -#2\relax}
+
+% Hex
+%
+\def\hexdigit#1{\ifcase#10\or 1\or 2\or 3\or 4\or
+    5\or 6\or 7\or 8\or 9\or A\or B\or C\or D\or E\or F\fi}
+
+% Log 10
+%
+\def\LogTen#1{\switch{\ifnum#1<}
+    {10 }{1} {100 }{2} {1000 }{3} {10000 }{4} {default}{5}
+    \endswitch}
+
+% List Manipulation ................
+% this assumes that #1 is a list of tokens, #2 is the name of a list
+%
+% Names of lists (and of items to pop into) are given as strings;
+% not as control sequences.
+%
+\newtoks\toks@lista \newtoks\toks@listb
+% basic append/prepend macro
+\long\def\@append@to@cslist#1#2#3{\begingroup\toks@lista=#2{#3}%
+  \global#1=\xp\xp\xp{\xp\the\xp#1\the\toks@lista}\endgroup}
+\long\def\@prepend@to@cslist#1#2#3{\begingroup\toks@lista=#2{#3}%
+  \global#1=\xp\xp\xp{\xp\the\xp\toks@lista\the#1}\endgroup}
+\def\@append@to@list{\csarg\@append@to@cslist}
+% variations:
+\long\def\append@to@list#1#2{\@append@to@list{#1}{}{#2}}
+\def\append@list@to@list#1#2{%
+  \@append@to@list{#1}{\xp\xp\xp}{\xp\the\csn#2\ecs}}
+\def\append@cslist@to@cslist#1#2{%
+  \@append@to@cslist{#1}\xp{\the#2}}
+\def\append@toks@cs@to@list#1#2{\@append@to@list{#1}\xp{\the#2}}
+
+% A few list macros for the user
+\def\NewList:#1 {\csarg\newtoks{#1}\global\csn#1\ecs{}}
+\def\EmptyList:#1 {\global\csn#1\ecs{}}
+\long\def\AppendToList:#1=#2 {\@append@to@list{#1}{}{#2}}
+\def\TheList:#1 {\let\oldwbuskip\willbeunhskip \let\willbeunhskip\@empty
+    \if\UndefinedCS{#1}\message{List <#1> undefined}
+    \else\csarg\the{#1}\fi
+    \let\willbeunhskip\oldwbuskip}
+
+\def\del@tok@from@list#1#2{\begingroup
+    \long\def\cs@liste##1#2##2\tok@SM
+       {\toks@lista{##1}\toks@listb{##2}%
+        \edef\cs@listb{\global\CSname{#1}=
+                {\the\toks@lista\the\toks@listb}}%
+        \cs@listb}%
+    \edef\cs@lista{\nxp\cs@liste{}\xp\the\csn#1\ecs\nxp\tok@SM}%
+    \cs@lista \endgroup}
+\def\in@front@of@list#1{\csarg{\let\xp\cs@lista}{#1}%
+  \in@front@of@cslist\cs@lista}
+\long\def\in@front@of@cslist#1#2{\begingroup\toks@lista={#2}%
+  \global#1=\xp\xp\xp{\xp\the\xp\toks@lista \the#1}%
+  \endgroup}
+\long\def\local@in@front@of@list#1#2{\toks@lista={#2}%
+    \csname#1\endcsname\xp\xp\xp\xp\xp\xp\xp
+                {\xp\xp\xp\the\xp\xp\xp\toks@lista 
+                 \xp\the\csname#1\endcsname}%
+    }
+\def\set@list#1{\csarg{\let\xp\cs@lista}{#1}%
+  \set@cslist\cs@lista}
+\long\def\set@cslist#1#2{\begingroup\toks@lista={#2}%
+   \global#1=\xp{\the\toks@lista}\endgroup}
+
+%%%%%%%%%%%%%%%% Stack macros
+%
+% push in terms of prepending of lists
+\def\push@cs@onto@cs#1#2{\@prepend@to@cslist#1\xp{\xp\\\xp{\the#2}}}
+\def\push@onto#1{\csarg\push@onto@cs{#1}}
+\def\push@onto@cs#1#2{\@prepend@to@cslist#1{}{\\{#2}}}
+\def\local@push@onto#1#2{\let\\=\relax 
+    \local@in@front@of@list{#1}{\\{#2}}}
+% pop via auxiliary macro: #1 is result, #2 is stack
+% two cs arguments
+\def\pop@cs@into#1#2{\edef\cs@e
+   {\nxp\@@popinto\nxp#1\nxp#2\the#2\nxp\@@pop}\cs@e}
+% two string arguments
+\def\pop@into#1#2{\edef\cs@e
+   {\nxp\@@popinto\CSname{#1}\CSname{#2}\csarg\the{#2}\nxp\@@pop}\cs@e}
+\long\def\@@popinto#1#2\\#3#4\@@pop{#1{#3}#2{#4}}
+\def\copy@stacktop#1#2{%
+    \edef\cs@e{\noexpand\@copy@stacktop
+                   {#1}\csarg\the{#2}\noexpand\@@pop}%
+    \cs@e}
+\def\@copy@stacktop#1\\#2#3\@@pop{\csname#1\endcsname#2\relax}
+\newcount\stack@length \newtoks\empty@stack \empty@stack{\\{}}
+\def\length@of@stack#1{\csarg\length@of@csstack{#1}}
+\def\length@of@csstack#1{\def\\##1{\advance\stack@length\@ne}%
+  \stack@length\m@ne \the#1}
+% turn a stack upside down
+\def\invert@csstack#1{\length@of@csstack{#1}%
+  \tempcountb\z@ \temptoksa\empty@stack
+  \loop\ifnum\tempcountb<\stack@length
+    \pop@cs@into\temptoksb#1\advance\stack@length\m@ne
+    \push@cs@onto@cs\temptoksa\temptoksb
+%    \append@cslist@to@cslist\temptoksb\temptoksa% append a to b
+%    \temptoksa\temptoksb
+    \repeat% copy b to a
+  #1\temptoksa \temptoksa\empty@toks}
+% invert a stack into a list
+\def\x@stack@to@list#1{\length@of@stack{#1}%
+  \tempcountb\z@ \temptoksa\empty@toks
+  \loop\ifnum\tempcountb<\stack@length
+    \pop@into{temptoksb}{#1}\advance\stack@length\m@ne
+    \append@list@to@list{temptoksb}{temptoksa}\repeat
+  \csn#1\ecs\temptoksa \temptoksa\empty@toks}
+    
+
+% Bookkeeping and Householding lists................
+% Generic Defaults
+% to be executed each time a definition starts
+%
+\ifini{\newtoks\generic@defaults}
+\def\adds@generic@default#1{
+   \append@to@list{generic@defaults}{#1}}
+\def\add@generic@default#1{\ifini
+   {\append@to@list{generic@defaults}{#1}}}
+
+% Document Start Commands
+% to be executed by \Start
+%
+\ifini{\newtoks\start@commands}
+\def\add@start@command#1{\ifini
+   {\append@to@list{start@commands}{#1}}}
+\def\adds@start@command#1{%
+    \append@to@list{start@commands}{#1}}
+
+% Document Stop Commands
+% to be executed by \Stop
+%
+\ifini{\newtoks\stop@commands}
+\def\add@stop@command#1{\ifini
+   {\append@to@list{stop@commands}{#1}}}
+\def\adds@stop@command#1{%
+    \append@to@list{stop@commands}{#1}}
+
+% Style Start Commands
+% to be executed by \StyleDefinition
+%
+\ifini{\newtoks\style@start@commands}
+\def\add@style@start@command#1{\ifini
+   {\append@to@list{style@start@commands}{#1}}}
+
+% Style Stop Commands
+% to be executed by \StyleDefinitionStop
+%
+\ifini{\newtoks\style@stop@commands}
+\def\add@style@stop@command#1{\ifini
+   {\append@to@list{style@stop@commands}{#1}}}
+\add@style@stop@command{\style@stop@commands{}
+    \style@start@commands{}}
+
+\def\check@existence#1{\Wmessage{Used \nxp\check@existence. Check}}
+%    \add@style@stop@command{\if\UndefinedCS{#1}\Wmessage
+%        {Some trouble involving #1; check definitions carefully!}\fi}
+
+%\add@style@start@command{\are@these@correct{}}
+%\add@style@stop@command{\if\IsEmptyList{\the\are@these@correct}\else
+%    \Wmessage{Check if the following are literals: \the\are@these@correct}
+%    \fi}
+
+% Tracing
+%
+% if trace@all=0 and \trace@foo is >0, every \Tmessage[foo] is written.
+% if \Trace:no, then all trace is disabled through \trace@all=-1
+% if \Trace:yes then all traces are written through \trace@all=1
+% by default: \trace@all=0
+%
+\def\Tmessage{\ifnum\trace@all>\m@ne\xp\t@message\else\xp\del@message\fi}
+\def\del@message[#1]#2{}\let\trace@prefix\@empty
+\def\t@message[#1]#2{%
+  \ifnum\trace@all>\z@ \def\trace@prefix{[T]}\@meld{#2}%
+  \else\csarg\ifnum{trace@#1}>\z@ 
+    \def\trace@prefix{[T:#1]}\@meld{#2}\fi
+  \fi\global\let\trace@prefix\@empty}
+
+\def\Trace:#1 {\switch{\if\EqualString{#1}}
+    {yes} {\trace@all\@ne\message{Switching ON all tracing}}
+    {no}  {\trace@all\m@ne\message{Switching OFF all tracing}}
+    {default} {\if\UndefinedCS{trace@#1}\Wmessage{Strange trace: #1}\else
+            \csname trace@#1\endcsname\@ne \trace@all\z@ \fi}
+    \endswitch}
+\def\NewTrace:#1 {\new@count{trace@#1}\m@ne}
+\new@count{trace@all}\z@
+\NewTrace:gen % traces everything in this file
+\NewTrace:def % definitions of constructs etc
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% Generic Constructs %%%%%%%%%%%%%%%%%%%%%
+
+% \@GenericConstruct{Foo} =
+%     \newtoks\Foo@defaults
+%     \Foo@defaults={}
+%     \def\add@Foo@default#1{...}
+%     \def\DefineFoo#1 =
+%                \@FooDefaults      % has to be defined explicitly
+%                \the\Foo@defaults  % constructed cumulatively
+%                \@GenericDefaults  % constructed cumulatively
+%                \@GetOptions
+%                \@DefineFoo        % has to be defined explicitly
+%     \def\@FooOption ...           % same syntax as \@GenericOption
+%
+% Options are either generic (the ones below)
+% defined by \@GenericOption,
+% or specific for some construct,
+% defined by \@FooOption
+%
+\ifini{\newtoks\@gencons}
+\newif\ifdefining@a@construct
+\def\@GenericConstruct#1{
+    \ifini{\append@to@list{@gencons}{\\#1;}
+           \csarg\newtoks{#1@defaults}
+           \csn #1@defaults\ecs{}}
+    \csarg\def{add@#1@default}##1{\ifini
+                   {\append@to@list{#1@defaults}{##1}}}
+    \csarg\def{adds@#1@default}##1{\append@to@list{#1@defaults}{##1}}
+    \Install@Noops{#1}
+    \csarg\def{Define#1}:##1 {\defining@a@constructyes
+        \def\@name{##1}\def\@class{#1}
+        \Tmessage[def]{Defining a #1: ##1}
+        \the\generic@defaults
+        \csarg\the{#1@defaults}
+        \Get@Items}
+    \csarg\def{@#1Option}##1{\csarg\def{#1@##1}####1####2}
+    }
+\add@generic@default{\let\pre@fix\@empty}
+\def\@command{\ifx\pre@fix\@empty\else\pre@fix @\fi\@name}
+\def\stop@command@suffix{Stop}
+\def\stop@command{\@command\stop@command@suffix}
+\def\@DefineStopCommand{\csarg\edef{\stop@command}}
+
+%%%% Abbreviated Closing:
+% every group defines its own \default@stop@command;
+% on the outer level this is an error msg.
+% \> closes whatever is open, \>] closes everything that is open.
+\def\outer@stop@command{\Emessage{Vacuous group closing}}
+\let\default@stop@command\outer@stop@command
+\def\>{\default@stop@command%[fool the editor
+    \ifNextChar]{\ifx\default@stop@command\outer@stop@command
+                       \xp\take@one
+                 \else \xp\>\fi}{}}
+\newif\if@implicitclose
+\add@generic@default{\@implicitcloseyes}
+% the next line replicated below
+%\@GenericOption{noimplicitclose}{\@implicitcloseno}
+\def\install@stop{\if@implicitclose
+        \def\nxp\default@stop@command{\CSname{\stop@command}}%
+    \else \let\nxp\default@stop@command\nxp\outer@stop@command 
+    \fi}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% Here is the main
+%%%%%%%%%%%%%%%% I T E M   A N A L Y S I S
+%%%%%%%%%%%%%%%% loop
+%%%%
+
+% This macro is recursive, but with some detours.
+% first filter out empty arguments
+%
+\def\Get@Items#1 {\if\IsEmptyList{#1}\let\get@next@item\Get@Items
+    \else\def\get@next@item{\@Get@Items#1 }\fi
+    \get@next@item}
+
+% Check if the argument is `Stop', in which case you
+% have reached the end of a generic definition. 
+% Otherwise filter the special case of a colon, and process an item
+%
+\NewDummy{Stop}
+\def\@Get@Items#1 {\let\get@next@item=\Get@Items
+    \csarg\ifx{#1}\Stop
+          \the\generic@stop@defaults
+          \let\get@next@item=\relax
+    \else \if\EqualString{#1}{:}\@add@toks{:}
+          \else \Item@or@Macro#1::. \fi 
+    \fi \get@next@item}
+
+% Default actions to be executed when GetItems has finished
+%
+\def\add@generic@stop@default#1{\ifini
+   {\append@to@list{generic@stop@defaults}{#1}}}
+\ifini{\newtoks\generic@stop@defaults}
+\add@generic@stop@default{\csname @Define\@class\endcsname}
+
+% Now check successive possibilities:
+% first it can be a macro.
+%
+\def\OptionsMacro:#1=#2Stop {\global\csarg\def{opt@mac@#1}{#2}}
+\def\split@at@is#1=#2=#3.{{#1}{#2}}
+\def\Item@or@Macro#1:#2:#3.{
+    \switch {\if\EqualString{#1}}
+      {macro} {\if\UndefinedCS{opt@mac@#2}
+            \Wmessage{Unknown macro: `#2'}
+            \else \edef\get@next@item{\nxp\Get@Items \csn opt@mac@#2\ecs }
+            \fi}
+    {default} {\edef\cs@e{\nxp\Option@Item{#1}\split@at@is#2==.}
+               \cs@e}
+    \endswitch}
+
+% The option #1 is not a Lollipop style macro. It can be
+% - a specific option
+% - a generic option
+% - a character
+% - a defined control sequence
+%
+% Is it an option of some sort?
+%
+\def\Option@Item#1#2#3{
+    \if\UndefinedCS{\@class @#1}
+        \if\UndefinedCS{\gen@option@name{#1}}
+              \Character@CS@Item{#1}{#2}{#3}
+        \else \if\EqualString{#2}{title}
+                 \edef\cs@e{\CSname{\gen@option@name{#1}}\CSname{#3Title}}
+                 \cs@e
+              \else \csn \gen@option@name{#1}\ecs{#2}{#3}
+              \fi
+              \Tmessage[gen]{Generic option `#1' for `\@class':
+                             `#2' = `#3'}
+        \fi
+    \else \if\EqualString{#2}{title}
+                 \edef\cs@e{\CSname{\@class @#1}\CSname{#3Title}}
+                 \cs@e
+          \else \csn \@class @#1\ecs{#2}{#3}
+          \fi
+          \Tmessage[gen]{Specific option `#1' for `\@class': `#2'}
+    \fi}
+
+% If it is not an option, is it a character or control sequence?
+%
+% Commands are either `\Command', `\Command:arg', `\Command:arg1=arg2'
+% See what arguments are nonempty in order to attach them;
+% in case 2 and 3 append space token.
+%
+\def\Character@CS@Item#1#2#3{
+    \def\cs@b{#1}\def\cs@c##1##2<<<{\def\cs@c{##1}}\cs@c#1<<<
+    \ifx\cs@b\cs@c \@add@toks{#1}
+          \Tmessage[gen]{Single character `#1' for `\@class'}
+    \else
+        \if\UndefinedCS{#1}
+            \Wmessage{Unknown option for `\@class': `#1' in `\@name'.}
+            \@add@toks{\csn#1\ecs}
+        \else 
+            \cs@in@ref@protect{#1}%
+            \edef\cs@e{\nxp\@add@toks{\CSname{#1}}}\cs@e
+        \fi
+        \if\IsEmptyList{#2} 
+        \else \if\IsEmptyList{#3}\@add@toks{:#2 }
+              \else             
+                 \if\EqualString{#2}{title}
+                       \edef\cs@e{\nxp\@add@toks{:\CSname{#3Title} }}
+                       \cs@e
+                 \else \@add@toks{:#2={#3} }
+                 \fi
+              \fi
+        \fi
+        \Tmessage[gen]{Command `#1' (#2,#3)}
+    \fi}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% G E N E R I C   O P T I O N S
+%%%%
+%
+% All generic constructs get these options.
+% They are at liberty to redefine them.
+%
+\newtoks\@GenericOptions
+\def\gen@option@name#1{Option@#1}
+\def\@GenericOption#1{
+    \append@to@list{@GenericOptions}{\\#1;}
+    \csarg\def{\gen@option@name{#1}}##1##2}
+\def\Noop@Error#1#2{\Emessage{Option #2 is not allowed for class #1}}
+
+\def\Install@Noops#1{
+    \csarg\def{@#1NOOP}##1{\csarg\def{#1@##1}{\Noop@Error{#1}{##1}}}
+    }
+\newtoks\@main@options@list
+\newtoks\before@coms \newtoks\after@coms
+\add@generic@default
+   {\def\@current@options@list{@main@options@list}%
+    \@main@options@list{}
+    \before@coms{} \after@coms{}}
+\long\def\@add@toks#1{\append@to@list{\@current@options@list}{#1}}
+\def\toks@add@toks#1{
+    \edef\cs@e{\nxp\append@to@list
+                 {\nxp\@current@options@list}{\xp\the\csn#1\ecs}}
+    \cs@e \let\cs@e\relax}
+\def\switch@to@options@list#1{\def\@current@options@list{#1}}
+\def\temp@options@list#1{
+    \xdef\saved@options@list{\@current@options@list}
+    \def\@current@options@list{#1}}
+\def\revert@options@list{
+    \xdef\@current@options@list{\saved@options@list}
+    \global\let\saved@options@list\@empty}
+
+\newtoks\z@toks \z@toks={0pt}
+
+% the next line should be higher, 
+% but \@GenericOption wasn't defined yet there
+\@GenericOption{noimplicitclose}{\@implicitcloseno}
+
+%%%%%%%%%%%%%%%% Universal textblock 
+%
+% These macros will only be used inside an \edef.
+% They are meant for text blocks, but the \outer@start@commands
+% are also necessary for output routines, hence the test
+% if this is a text-like construct.
+%
+\newif\iftext@construct
+\add@generic@default{\text@constructyes}
+
+% Level of nesting
+%
+\newcount\nest@depth
+
+% Open command
+%
+\def\@gen@open{\outer@start@commands 
+    \begingroup \inner@start@commands}
+
+\def\outer@start@commands{%
+    \iftext@construct
+        \ifleft@embedded@construct \install@h@before@penalty
+        \else \nxp\leavehmode \nxp\v@buffer{\the\@whitebefore}%
+        % backspace previous white space while it's visible
+              \nxp\if@headed\nxp\else\install@v@before@penalty
+              \nxp\fi
+    \fi \fi
+    \ifhas@counter \nxp\StepCounter:\expandafter\@name\@space
+        % This sets the \current@label by default
+        \ifhas@marks
+            \edef\nxp\cs@e{\nxp\nxp\nxp\refresh@mark@item
+                         {\@name Counter}{\CSname{\@name Counter}}}%
+            \nxp\cs@e      
+        \fi
+        \fi
+    \iflabel@defined 
+        \global\current@label={\the\@labelcoms}\fi
+    \ifhas@title \install@title@code
+        % subtle: the title has to be installed after any page break
+        % otherwise footlines may contain the wrong title.
+        % also the title has to be global.
+    \fi
+    \ifhas@marks\nxp\ifnin{\nxp\place@mark}\fi
+        %otherwise IniTeX'ing Lollipop will output a page
+    \nxp\xx@label\the\extern@toks\penalty\@M
+        % also subtle: if this white space would be higher, it would
+        % be invisible because of marks et cetera.
+        % insert nobreak after marks/writes to prevent page breaks.
+    \iftext@construct
+        \ifleft@embedded@construct
+              \else \nxp\@vwhite{\the\@whitebefore}\fi
+    \fi
+    }
+\def\inner@start@commands{%
+    \nxp\Open@Group\CSname{\@class}\CSname{\@name}%
+    \install@stop
+    \ifleft@embedded@construct
+    \else \nxp\hold@parskip 
+        \nxp\default@everypar
+        \ifwhiteleft@defined 
+            \advance@skip\leftskip{\the\@whiteleft}\fi
+        \ifwhiteright@defined 
+            \advance@skip\rightskip{\the\@whiteright}\fi
+        \nxp\let\nxp\par=\nxp\@par %explain to me again why this is necessary...
+        \inside@indent \first@indent
+    \fi
+    \advance\nest@depth\@ne
+    }
+
+\def\@gen@close{\inner@end@commands \endgroup \outer@end@commands}
+\def\inner@end@commands{%
+    \nxp\Close@Group\CSname{\@class}\CSname{\@name}%
+    \the\late@extern@toks
+    \ifright@embedded@construct \install@h@after@penalty
+    \else \nxp\leavehmode \install@v@after@penalty
+          \nxp\@vwhite{\the\@whiteafter}\fi
+    }
+\def\outer@end@commands{%
+    \the\after@toks
+    \ifright@embedded@construct \nxp\@headedno
+    \else \after@indent \nxp\dono@parskip
+    \fi}
+\let\esp@hack\relax
+\def\bsp@hack{\let\esp@hack\relax
+    \ifhmode\ifdim\lastskip>\z@\let\esp@hack\ignorespaces\fi\fi}
+
+%%%%%%%%%%%%%%%% Breaking
+
+% Constructs such as 'line' or 'rule' introduce breakpoints.
+% Here's how we deal with that. The \ifat@breakpoint test is set
+% by options such as 'line' or 'vwhite'. Similarly, these options
+% test for this condition and if necessary protect.
+% After 'text' in a text block the condition is set too.
+\newif\ifat@breakpoint
+\add@generic@default{\at@breakpointno}
+\def\protect@breakpoint{\ifat@breakpoint\@add@toks{\nobreak}\fi}
+
+% Break Before
+% user specifies yes/no, numeric value, or name of value
+% yes also does a fill
+% default: place zero penalty
+%
+\newif\ifdefault@break@before
+\adds@generic@default{\default@break@beforeyes}
+\@GenericOption{breakbefore}{\default@break@beforeno
+    \switch {\if\EqualString{#1}}
+    {no}  {\def\@beforepenalty{\penalty\@M }}
+    {yes} {\def\@beforepenalty{\CSname{\h@or@v fil}\penalty-\@M}}
+    {0}   {\def\@beforepenalty{}}
+    {default} 
+      {\edef\cs@e{\def\nxp\@beforepenalty
+                     {\penalty\@w@w{#1}\relax}}
+       \cs@e}
+    \endswitch}
+\def\install@v@before@penalty
+   {\ifdefault@break@before\penalty\z@
+    \else\nxp\ifnum\lastpenalty=\z@\@beforepenalty\nxp\fi
+    \fi}
+\def\install@h@before@penalty
+   {\ifdefault@break@before
+    \else\nxp\ifnum\lastpenalty=\z@\@beforepenalty\nxp\fi
+    \fi}
+
+% Break After
+% same story
+%
+\newif\ifdefault@break@after
+\adds@generic@default{\default@break@afteryes}% Heading overrides
+\@GenericOption{breakafter}{\default@break@afterno
+    \switch {\if\EqualString{#1}}
+    {no}  {\def\@afterpenalty{\penalty\@M }}
+    {yes} {\def\@afterpenalty{\CSname{\h@or@v fil}\penalty-\@M}}
+    {0}   {\def\@afterpenalty{}}
+    {default} 
+      {\edef\cs@e{\def\nxp\@afterpenalty
+                     {\penalty\@w@w{#1}\relax}}
+       \cs@e}
+    \endswitch}
+\def\install@v@after@penalty
+   {\ifdefault@break@after\penalty\z@ \else\@afterpenalty \fi}
+\def\install@h@after@penalty
+   {\ifdefault@break@after \else\@afterpenalty \fi}
+
+%%%%%%%%%%%%%%%% Surrounding White Space 
+% WhiteBefore
+% amount is put in token list \@whitebefore,
+% the \@define... macro uses this to its own discretion
+% For the three text construct this happens in the general macros
+% In ExternalItem a different default is used
+%
+\ifini{\newtoks\@whitebefore \newskip\whitebefore}
+\add@generic@default{\@whitebefore={whitebefore}}
+\whitebefore=6pt plus 6pt\relax
+\@GenericOption{whitebefore}{
+%    \edef\cs@e{\@whitebefore={\@w@w{#1}}}\cs@e}
+    \@whitebefore={#1}}
+
+% WhiteAfter
+% same story with \@whiteafter
+%
+\ifini{\newtoks\@whiteafter \newskip\whiteafter}
+\add@generic@default{\@whiteafter={whiteafter}}
+\whiteafter=6pt\relax
+\@GenericOption{whiteafter}{
+%    \edef\cs@e{\@whiteafter={\@w@w{#1}}}\cs@e}
+    \@whiteafter={#1}}
+
+% WhiteLeft
+% same story with \@whiteleft
+%
+\ifini{\newtoks\@whiteleft}
+\newif\ifwhiteleft@defined
+\add@generic@default{\@whiteleft\z@toks \whiteleft@definedno}
+\@GenericOption{whiteleft}{
+%    \edef\cs@e{\nxp\@whiteleft={\@w@w{#1}}}\cs@e
+    \@whiteleft={#1}
+    \whiteleft@definedyes}
+
+% WhiteRight
+% same story with \@whiteright
+%
+\ifini{\newtoks\@whiteright}
+\newif\ifwhiteright@defined
+\add@generic@default{\@whiteright\z@toks \whiteright@definedno}
+\@GenericOption{whiteright}{
+    \edef\cs@e{\nxp\@whiteright={\@w@w{#1}}}\cs@e
+    \whiteright@definedyes}
+
+%%%%%%%%%%%%%%%% Group Bookkeeping
+\def\@@nulklasse{????}\def\@@nulnaam{????}
+\let\@@groepklasse=\@@nulklasse \let\@Group@Name=\@@nulnaam
+
+% Grouping level during definition
+%
+\new@@counter{group} 
+\add@generic@default{\start@counter{group}}
+\add@generic@stop@default{\if\TestCounter:group >0 
+    \Emessage{There are groups open in <\@name>}\fi}
+
+\add@generic@default{\def\current@def@group{>>OUTER LEVEL<<}}
+\def\b@group{\edef\@outer@options@list{\@current@options@list}
+  \bgroup\step@counter{group}
+  \ifnextchar[\def@def@group{}%]
+  }
+\def\def@def@group[#1]{\def\current@def@group{#1}}
+\def\e@group{\ifnextchar[\test@def@group\egroup%]
+    }
+\def\test@def@group[#1]{\def\current@test@group{#1}
+    \ifx\current@def@group\current@test@group\egroup
+    \else\Emessage{Closing `\current@def@group' with `\current@test@group'
+                   in \@class: \@name}
+    \fi}
+
+
+% Grouping during execution
+%
+\def\@@testklasse{OUTER}\def\@@testnaam{OUTER}
+\def\@DEFgroepsluit{\nxp\Close@Group{\@class}{\@name}}
+\def\@groepERR#1#2{\Wmessage{Unexpected close of 
+    <\expandafter\string#1; expected: \expandafter\string#2.}}
+\newcount\group@open@lineno
+\def\Open@Group#1#2{\def\@@groepklasse{#1}\def\@Group@Name{#2}%
+    \Tmessage[gen]{Open \string#1\@space \string#2 @ \the\inputlineno}
+    \group@open@lineno\inputlineno}
+\def\Close@Group#1#2{\def\@@testklasse{#1}\def\@@testnaam{#2}%
+    \ifx\@@testnaam\@Group@Name 
+        \Tmessage[gen]{Close \string#1\@space \string#2}%
+    \else \@groepERR{\@@testnaam}{\@Group@Name}\fi}
+\def\Close@all@groups
+   {\ifx\@Group@Name\@@nulnaam
+    \else \Wmessage{Group not closed: \expandafter\string\@Group@Name; 
+            start @\the\group@open@lineno}
+          \endgroup
+          \Close@all@groups
+    \fi}
+
+\def\@groeptester{\ifx\@Group@Name\@@nulnaam
+    \else \Wmessage{Group still open: \expandafter\string\@Group@Name}\fi}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% Counters
+
+% Counter name
+% has been abstracted.
+% this may be removed later for efficiency.
+%
+%\def\counter@name#1{#1@C}%defined above
+\def\cs@counter@name#1{\csn#1@C\ecs}
+\def\counter@@name#1{\CSname{#1@C}}
+\def\counter@value#1{\xp\the\csn#1@C\ecs}
+
+%
+% \NewCounter:COUNTER
+%     \newcount\COUNTER@C
+%     \CounterRepresentation:COUNTER=1  ; print arabic numeral
+%     \StartCounter:COUNTER             ; set to 0
+%     \COUNTER@RL={}                    ; create reset list
+%
+% \CounterRepresentation:THING=W
+%     if W is another counter, make synonym, otherwise
+%     \THING@R <- representation command
+%     \THINGCounter = \THING@R \THING@C
+% #1 = naam van een nieuw te definieren teller; 
+% #2 = telwijze of naam van teller waar de nieuwe teller synoniem
+%      mee moet worden.
+%
+\def\NewCounter:#1 {\new@counter{#1}}
+\def\new@counter#1{
+    \new@@counter{#1}\csarg\edef{#1Value}{\counter@@name{#1}}
+    \CounterRepresentation:{#1}=1
+    \StartCounter:{#1}
+    }
+% given above
+%\def\new@@counter#1{\csarg\newcount{\counter@name{#1}}}
+\def\AdaptiveCounter:#1 
+   {\if\UndefinedCS{\counter@name{#1}}\new@counter{#1}\fi
+    \adds@stop@command
+      {\ifWriteExtern\immediate\write\aux@file
+         {\string\SetCounter:#1={\counter@value{#1}}} \fi
+         }}
+
+% Counter allocation in the generic constructs
+%     counter:x
+% indicates the mode of representation of the counter
+% of the construct being defined. The counter is first allocated.
+% A switch is thrown that will generate automatic step instructions.
+%
+\newif\ifhas@counter
+\@GenericOption{HasCounter}{
+    \switch {\if\EqualString{#1}}
+    {yes} {\has@counteryes\has@labelyes
+           \if\IsEmptyList{#2}\else\def\this@counter@repr{#2}\fi}
+    {no}  {\has@counterno}
+    {default} {\has@counteryes}
+    \endswitch}
+\@GenericOption{counter}{
+    \ifin@label \edef\cs@e{\nxp\@add@toks{\CSname{\@name Counter}}}
+         \cs@e
+    \else\has@counteryes\has@labelyes \def\this@counter@repr{#1}
+    \fi}
+\def\install@counter#1{\new@counter{\@name}%
+    \ifhas@marks\xp\add@mark@item\xp{\@name Counter}\fi
+    \if\IsEmptyList{#1}\else\CounterRepresentation:\@name=#1 \fi
+    }
+
+% Counter-related defaults: initially there is no counter,
+% if a counter starts it counts Arabic unless otherwise indicated,
+% and the countername associated with this construct is
+% made available as an option; 
+% later it will be a command, and the option is removed again.
+%
+\add@generic@default{\has@counterno\has@labelno
+    \def\this@counter@repr{1}
+    \csarg\def{\gen@option@name{\@name Counter}}{%
+        \edef\cs@e{\nxp\@add@toks{%\nxp\cprotect
+                           \CSname{\@name Counter}}}\cs@e
+        \global\has@counteryes\global\has@labelyes}}
+\add@generic@stop@default
+   {\csarg\let{\gen@option@name{\@name Counter}}\relax}
+\add@generic@stop@default{\ifhas@counter
+    \xp\install@counter\xp{\this@counter@repr}\fi}
+
+%titles are handled below but the actions have to be
+%in this order.
+\add@generic@stop@default
+  {\ifhas@title \ifshort@title \@sTitelize\@command
+                \else \@Titelize{\@command}
+   \fi\fi}
+\add@generic@stop@default{\ifhas@label \@Labelize{\@command}\fi}
+
+
+%%%%%%%%%%%%%%%% Counter Representaton
+% main use: indicate representation of numerical value of counter
+% control sequence \FooCounter <- Foo@R\Foo@C
+% two-step approach necessary because of symbolic reference:
+% not all representations work purely by expansion.
+%
+
+% 1 arabic, i lowercase roman, I uppercase roman
+% a lowercase character, A uppercase Character
+%
+\def\@arabic#1{\number#1 }
+\def\@lcascii#1{{\tempcounta=#1\relax \advance\tempcounta by 96
+    \char\tempcounta\relax}}
+\def\@ucascii#1{{\tempcounta=#1\relax \advance\tempcounta by 64
+    \char\tempcounta\relax}}
+\def\@roman#1{\romannumeral#1 }
+\def\@Roman#1{\uppercase\expandafter{\romannumeral#1}}
+
+% Representation has been abstracted
+%
+\def\counter@repr#1{#1@R}
+
+% Give the representing control sequence (@roman, ...)
+% inside an \edef
+%
+\def\counter@@repr#1{\xp\xp\xp\string\csname#1@R\endcsname}
+
+% Counter Representation (user command)
+% decides if this is a real representation command,
+% or a synonym declaration
+%
+\def\CounterRepresentation:#1=#2 {
+    \if\UndefinedCS{\counter@name{#2}}%is this counter a synonym?
+          \represent@counter{#1}{#2}
+    \else \@SynonymCounter{#1}{#2}
+    \fi}
+\def\represent@counter#1#2{
+    \edef\cs@e{@\if#2iroman\else
+       \if#2IRoman\else \if#2alcascii\else
+       \if#2Aucascii\else arabic\fi\fi\fi\fi}
+    \csarg\xdef{\counter@repr{#1}}{\CSname{\cs@e}}
+    \csarg\xdef{#1Counter}{\nxp\cprotect %\xp\string when writing label out
+          \CSname{\counter@repr{#1}}{\nxp\number\counter@@name{#1}}}
+    }
+\def\cprotect{}
+
+\def\PrintCounter:#1 {\csn#1Counter\ecs}
+
+% Synonym Counters
+% share the \FooCounter command, internal name, and reset list
+%
+\def\@SynonymCounter#1#2{
+    \edef\cs@b{\nxp\let\counter@@name{#1}=\counter@@name{#2}
+               \nxp\let\CSname{#1Counter}=\CSname{#2Counter}
+               \nxp\let\CSname{#1@RL}=\CSname{#2@RL}}
+    \cs@b
+    }
+
+% Synonym as generic option
+%     sharecounter:xyz
+% Don't allocate a counter, but share the counter of the
+% 'xyz' construct.
+%
+\@GenericOption{sharecounter}{\CounterRepresentation:\@name=#1 }
+
+% Governing counters
+% If a counter governs another counter, the other is reset
+% whenever the first is altered.
+%
+\def\GoverningCounter:#1=#2 {\tempano
+  \if\UndefinedCS{\counter@name{#1}}
+    \Wmessage{No such counter <#1>}
+  \else\if\UndefinedCS{\counter@name{#2}}
+            \Wmessage{No such counter <#2>}
+         \else\tempayes
+  \fi\fi
+  \iftempa\if\UndefinedCS{#2@RL}\csarg\newtoks{#2@RL}
+             \csn #2@RL\ecs={}\fi
+    \append@to@list{#2@RL}{\\#1;}
+  \fi}
+\def\reset@subordinates#1{\if\UndefinedCS{#1@RL}\else
+    \def\\##1;{\start@counter{##1}}%
+    \the\csname #1@RL\endcsname  \let\\=\relax
+  \fi}
+
+% User counter manipulation
+% should be global, and should reset subordinate counters
+% and define references.
+%
+\def\StartCounter:#1 {\handle@user@counter{#1}{start}{}}
+\let\ResetCounter\StartCounter
+\def\StepCounter:#1 {\handle@user@counter{#1}{step}{}}
+\def\AddToCounter:#1=#2 {\handle@user@counter{#1}{addto}{#2}}
+\def\BackStepCounter:#1 {\handle@user@counter{#1}{back@step}{}}
+\def\SetCounter:#1=#2 {\handle@user@counter{#1}{set}{#2}}
+\def\handle@user@counter#1#2#3{\if\UndefinedCS{\counter@name{#1}}
+          \Wmessage{Unknown counter: #1}
+    \else \begingroup\globaldefs\@ne
+          \csn#2@counter\ecs{#1}{#3}%
+          \reset@subordinates{#1}\define@reference{#1}%
+          \endgroup
+    \fi}
+
+% Numeric manipulation
+%
+\def\CounterValue:#1 {%
+  \if\UndefinedCS{\counter@name{#1}}0
+  \else \cs@counter@name{#1}\fi
+  }
+\def\TestCounter:#1 {00\fi\ifnum\cs@counter@name{#1}}
+
+% Internal counter manipulation
+% is local and has no side effects
+%
+\def\step@counter#1{\increase@value{\counter@name{#1}}\@ne}
+\def\addto@counter#1#2{\edef\cs@e
+    {\nxp\increase@value{\nxp\counter@name{#1}}{\w@w{#2}}}\cs@e}
+\def\back@step@counter#1{\increase@value{\counter@name{#1}}\m@ne}
+\def\start@counter#1{\set@value{\counter@name{#1}}\z@}
+\def\set@counter#1#2{\edef\cs@e
+    {\nxp\set@value{\nxp\counter@name{#1}}{\w@w{#2}}}\cs@e}
+
+
+%%%%%%%%%%%%%%%% Title
+%
+% All constructs can have titles.
+% By using the option 'title' the user indicates that
+% this particular option has a title.
+% A control sequence \constructTitle is defined.
+%
+% In case the \constructTitle is only used in a macro,
+% the user has to set HasTitle:yes as an option.
+%
+\def\@@@title#1{#1Title}\def\@@title{\@@@title\@name}
+\newif\ifhas@title\add@generic@default{\has@titleno}
+\newif\ifshort@title\add@generic@default{\short@titleno}
+\add@generic@stop@default % we cannot use @@title here!
+   {\ifhas@marks\ifhas@title\xp\add@mark@item\xp{\@name Title}\fi\fi}
+\def\give@title{\global\has@titleyes
+  \global\csarg\let\@@title\@space 
+         %to define it until first call
+  }
+\@GenericOption{title}{\give@title
+  \ifin@external \if\IsEmptyList{#1}
+      \external@handle@title{\@name}
+    \else \external@handle@title{#1}\fi
+  \else \if\IsEmptyList{#1}
+      \edef\cs@e{\nxp\@add@toks{\CSname{\@@title}}}\cs@e
+    \else\Wmessage{Parametrized titles only in external}\fi
+  \fi
+  }
+\@GenericOption{HasTitle}{
+    \switch {\if\EqualString{#1}}
+    {yes} {\give@title}
+    {no}  {\global\has@titleno}
+    {short} {\give@title \global\short@titleyes}
+    {default} {\give@title}
+    \endswitch
+    }
+
+% this code appears in \outer@start@commands;
+% it will be executed in an \edef
+%
+\newtoks\title@toks
+\def\install@title@code
+   {%\nxp\xp\gdef\nxp\xp\CSname{\@name Title}\nxp\xp{%
+    %       \nxp\xp\nxp\maybe@uppercase\nxp\xp{\nxp\the\title@toks}}%
+  \nxp\xp\gdef\nxp\xp\CSname{\@name Title}\nxp\xp
+         {\nxp\the\title@toks}%
+  \ifhas@marks
+    \edef\nxp\cs@e{\nxp\nxp\nxp\refresh@mark@item
+                         {\@name Title}{\nxp\the\title@toks}}%
+    \nxp\cs@e
+  \fi}
+
+% Give a macro a title
+%
+%\add@generic@stop@default{\ifhas@title \@Titelize{\@name}\fi} %above!
+%
+\newcount\extra@args \add@generic@default{\extra@args\z@}
+\def\ttl@name#1{ttl@#1}
+\def\@Titelize#1{\edef\cs@e{\let\CSname{\ttl@name{#1}}=\CSname{#1}}\cs@e
+    \ifcase\extra@args %0:
+        \csarg\edef{#1}##1\par
+             {\title@toks\nxp\xp{\nxp\id@##1\nxp\willbeunhskip}%
+%             {\title@toks{##1\nxp\protect\nxp\unhskip}%
+              \CSname{\ttl@name{#1}}}
+    \or %1:
+        \csarg\edef{#1}##1##2\par
+             {\title@toks\nxp\xp{\nxp\id@##2\nxp\willbeunhskip}%
+%             {\title@toks{##2\nxp\protect\nxp\unhskip}%
+              \CSname{\ttl@name{#1}}{##1}}
+    \or %2:
+        \csarg\edef{#1}##1##2##3\par
+             {\title@toks\nxp\xp{\nxp\id@##3\nxp\willbeunhskip}%
+%             {\title@toks{##3\nxp\protect\nxp\unhskip}%
+              \CSname{\ttl@name{#1}}{##1}{##2}}
+    \else \Wmessage{Sorry, too many extra arguments %
+                    for `\@class' : `\@name'}
+    \fi}
+\begingroup\catcode`\^^M\active \endlinechar-1\relax%
+% trick: with an active ^^M we can let it expand to \@space
+% not a 100\% solution, true.
+\gdef\@sTitelize#1{
+  \edef\cs@e{\let\CSname{x@\ttl@name{#1}}=\CSname{#1}}\cs@e
+  \csarg\edef{#1}{\begingroup\endlinechar`\nxp\^^M
+      \catcode\endlinechar\active\CSname{\ttl@name{#1}}}
+% short titles can have no unwanted trailing space
+  \ifcase\extra@args %0:
+      \csarg\edef{\ttl@name{#1}}##1^^M
+         {\endgroup\let\nxp^^M\nxp\@space
+          \title@toks\nxp\xp{\nxp\id@##1}%
+%          \title@toks{##1\nxp\protect\nxp\unhskip}%
+          \CSname{x@\ttl@name{#1}}}
+  \or %1:
+      \csarg\edef{\ttl@name{#1}}##1##2^^M
+         {\endgroup\let\nxp^^M\nxp\@space
+          \title@toks\nxp\xp{\nxp\id@##2}%
+%          \title@toks{##2\nxp\protect\nxp\unhskip}%
+          \CSname{x@\ttl@name{#1}}{##1}}
+  \or %2:
+      \csarg\edef{\ttl@name{#1}}##1##2##3^^M
+         {\endgroup\let\nxp^^M\nxp\@space
+          \title@toks\nxp\xp{\nxp\id@##3}%
+%          \title@toks{##3\nxp\protect\nxp\unhskip}%
+          \CSname{x@\ttl@name{#1}}{##1}{##2}}
+  \else \Wmessage{Sorry, too many extra arguments %
+                    for `\@class' : `\@name'}
+  \fi}
+\endgroup
+
+% Uppercase titles are a big problem
+% after \MakeUpperCase
+% any appearing title (including when it comes out of a mark)
+% is uppercased
+%
+\newif\ifUpperCasing \def\MakeUpperCase{\UpperCasingyes}
+\def\maybe@uppercase{\ifUpperCasing\uppercase\xp\fi}
+
+%%%%%%%%%%%%%%%% M O D E S
+%
+% controls whether a construct can start/end as part of a paragraph.
+% chooses between a lot of horizontal/vertical commands.
+% 
+% this should appear as one of the first options.
+% maybe generate an error msg if it doesn't
+%
+\newif\ifleft@embedded@construct
+\newif\ifright@embedded@construct
+\add@generic@default{\left@embedded@constructno\right@embedded@constructno}
+\newif\if@hmode \newif\if@vmode
+\add@generic@default{\@hmodeno\@vmodeyes}
+\@GenericOption{embedded}{\switch {\if\EqualString{#1}}
+    {yes}   {\left@embedded@constructyes\right@embedded@constructyes}
+    {no}    {\left@embedded@constructno \right@embedded@constructno}
+    {left}  {\left@embedded@constructyes\right@embedded@constructno}
+    {right} {\left@embedded@constructno \right@embedded@constructyes}
+    {default} {\Wmessage{Strange modifier: `embedded:#1'}}
+    \endswitch
+    \ifleft@embedded@construct \@hmodeyes \@vmodeno \fi}
+
+% Mode dependent
+%
+\def\h@or@v{\ifleft@embedded@construct h\else v\fi}
+\def\append@no@hv@break
+   {\edef\cs@e{\nxp\@add@toks{%\if@hmode \if@vmode\else\nxp\leavevmode\fi\fi
+                         %\if@vmode \if@hmode\else\nxp\leavehmode\fi\fi
+                         \nxp\nobreak}}
+    \cs@e}
+
+%%%%%%%%%%%%%%%% Boxes
+%
+% Line
+% is a \hbox to \hsize
+% mainly used to determine the width of stuff inside it.
+%
+\newif\ifin@line
+\add@generic@default{\in@lineno}
+\newcount\text@in@line \newtoks\line@toks \newbox\line@box
+\def\rm@to@end@of@box{\everyvbox{}%
+    \setbox\tempboxa\vbox\bgroup
+    \aftergroup\rm@tmp@box}
+\def\rm@tmp@box{\setbox\tempboxa\box\voidb@x\egroup}
+\def\definitely@to@hsize{\def\maybe@to@hsize{ to\hsize}}
+\@GenericOption{line}{
+    \switch {\if\EqualString{#1}}
+    {start} {\protect@breakpoint
+          \b@group[line]\in@lineyes\line@toks{}
+          \temp@options@list{line@toks}
+          \@add@toks{\hbox \maybe@to@hsize\bgroup}\text@in@line\z@
+          }
+    {stop}  {\@add@toks{\hfil\egroup}\revert@options@list
+          \ifnum\text@in@line>\z@ 
+              \edef\cs@e{\nxp\@add@toks
+                           {\line@toks={\the\line@toks}}}\cs@e
+              \@add@toks{\begingroup\everyvbox{\rm@to@end@of@box}%
+                         \let\maybe@to@hsize\relax
+                         \setbox\line@box\the\line@toks
+                         \tempdima\hsize\advance\tempdima-\wd\line@box
+                         \everyvbox{}\definitely@to@hsize
+                         \everyvbox{\hsize\tempdima}\the\line@toks
+                         \endgroup}
+          \else \@add@toks{\definitely@to@hsize}
+              \toks@add@toks{line@toks} 
+          \fi
+          \e@group[line]\at@breakpointyes}
+    {default} {\Wmessage{Strange modifier: `line:#1'}}
+    \endswitch}
+
+% Tekstkolom. Is een \vbox of \vtop.
+%     Openen met 'begin' 'ophangen', 'topregel' of 'voetregel',
+%        start,topregel : \vtop
+%        voetregel      : \vbox
+%        ophangen       : \vtop{\kern\z@
+%     Eindigen met 'stop'
+\@GenericOption{textcolumn}{
+    \switch {\if\EqualString{#1}}
+    {stop}     {\@add@toks{\egroup}\global\BlockWidth\hsize
+             \e@group[textcolumn]\at@breakpointyes}
+    {start}    {\open@text@column\vtop{}}
+    {topline}  {\open@text@column\vtop{}}
+    {hang}     {\open@text@column\vtop{\kern\z@}}
+    {footline} {\open@text@column\vbox{}}
+    {default} {\Wmessage{Strange modifier: `textcolumn:#1=#2'}}
+    \endswitch}
+\def\open@text@column#1#2%
+   {\ifin@line\advance\text@in@line\@ne\else\protect@breakpoint\fi
+    \@add@toks{#1\bgroup#2\leftskip\z@ \Indent:no \leavevmode}
+    \b@group[textcolumn]
+    \ifin@line\else\aftergroup\at@breakpointyes\fi
+    }
+
+% Depth strut: for use in line
+\@GenericOption{depth}{
+    \edef\cs@e{\nxp\@add@toks{\vrule width\z@ height\z@ depth \@w@w{#1}}}
+    \cs@e}
+
+% Block
+% is an hbox
+% opening
+%   1/ blok:start --> \setbox\block@box=\hbox{
+%           and \block@closing = }
+%   2/ blok:hang  --> \setbox\block@box=\hbox{\vtop{\kern\z@\hbox{
+%           and \block@closing = }}}
+% closing
+%   1/ blok:stop  --> \block@closing \box\block@box
+%   2/ stickout:left/right --> \block@closing \l/rlap{\box\block@box}
+%   3/ fillupto:foo --> \block@closing 
+%                           \hbox to \foo{\unhbox\block@box\hfil}
+%
+\newbox\block@box \newif\ifin@box
+\add@generic@default{\in@boxno
+    \def\block@closing{\ifin@box\else
+        \Wmessage{Closing `block', but not opened. This is serious!}\fi}
+    }
+\def\block@closing{}
+\newdimen\BlockWidth
+\def\Measure@Block{\global\BlockWidth\wd\block@box}
+\@GenericOption{block}{
+    \switch {\if\EqualString{#1}}
+        {stop}  {\stop@block}
+        {hang}  {\start@block
+                    {\vtop\bgroup\kern\z@\hbox\bgroup}
+                    {\egroup\egroup}}
+        {start} {\start@block{}{}}
+        {default} {\Wmessage{Strange option: `block:#1'}}
+    \endswitch}
+\def\start@block#1#2{
+    \ifin@line\else\protect@breakpoint\fi
+    \@add@toks{\setbox\block@box=\hbox\bgroup#1}
+    \b@group[block]
+    \ifin@line\else\aftergroup\at@breakpointyes\fi
+    \def\block@closing{\@add@toks{#2\egroup\Measure@Block}}
+    }
+\def\stop@block{\block@closing
+    \ifin@box \@add@toks{\advance\hsize by -\wd\block@box} \fi
+    \@add@toks{\box\block@box}
+    \e@group[block]}
+
+\@GenericOption{fillupto}{
+    \block@closing \e@group[block]
+    \edef\cs@e{\nxp\@add@toks{\hbox to \@w@w{#1}{\unhbox\block@box\hfil}}}
+    \cs@e
+    \ifin@line \edef\cs@e{\nxp\@add@toks{\advance\hsize by -\@w@w{#1}}}
+               \cs@e \fi
+    }
+\@GenericOption{stickout}{
+   \block@closing \e@group[block]
+   \switch {\if\EqualString{#1}}
+      {right} {\stickout@right{#2}}
+      {left}  {\stickout@left{#2}}
+      {default} {\Wmessage{Unknown qualifier (stickout:) `#1'}}
+    \endswitch
+   }
+\def\stickout@left#1{
+    \@add@toks{\llap}
+    \if\IsEmptyList{#1}
+          \@add@toks{{\box\block@box}}
+    \else \edef\cs@e{\nxp\@add@toks{{\hbox to \@w@w{#1}
+                     {\box\block@box\hss}}}}
+          \cs@e
+    \fi}
+\def\stickout@right#1{
+    \@add@toks{\rlap}
+    \if\IsEmptyList{#1}
+          \@add@toks{{\box\block@box}}
+    \else \edef\cs@e{\nxp\@add@toks{{\hbox to \@w@w{#1}
+                     {\hss\box\block@box}}}}
+          \cs@e
+    \fi}
+
+%%%%%%%%%%%%%%%% Tidbits
+
+% Commands
+%
+\@GenericOption{command}{
+  \ifin@external \external@handle@expandable{#1}{\csn#1\ecs}{<#1>}
+  \else
+    \if\UndefinedCS{#1}\Wmessage{Undefined command: <#1>}\fi
+    \edef\cs@e{\nxp\@add@toks{\CSname{#1}}}\cs@e
+  \fi}
+\@GenericOption{CSname}{
+  \edef\cs@e{\nxp\@add@toks{\CSname{#1}}}\cs@e}
+
+% Literal text.
+% only problem if this is a colon.
+%
+\@GenericOption{literal}{\@add@toks{#1}}
+
+% Arguments.
+%
+\@GenericOption{arg}{\edef\cs@e
+   {\nxp\@add@toks{\iftrue{\else}\fi#1\iffalse{\else}\fi}}
+   \cs@e}
+\@GenericOption{OpenBrace}{\edef\cs@e
+   {\nxp\@add@toks{\iftrue{\else}\fi}}
+   \cs@e}
+\@GenericOption{CloseBrace}{\edef\cs@e
+   {\nxp\@add@toks{\iffalse{\else}\fi}}
+   \cs@e}
+% Extra Commands before and after
+%
+\newtoks\before@toks \add@generic@default{\before@toks{}}
+\@GenericOption{commandbefore}{
+    \edef\cs@e{\nxp\append@to@list{before@toks}{\CSname{#1}}}
+    \cs@e}
+\newtoks\after@toks  \add@generic@default{\after@toks{}}
+\def\add@after@command#1{\append@to@list{after@toks}{#1}}
+\@GenericOption{commandafter}{
+    \edef\cs@e{\nxp\add@after@command{\CSname{#1}}}
+    \cs@e}
+
+\endinput
+
+92/11/03 Improved penalty handling for embedded environments
+    \ifini test extended to make loading on top of plain possible
+92/11/08 Breakpoint protection into line/block/textcolumn
+92/11/14 Resetlist generation made conditional
+92/11/21 option 'arg'
+92/12/12 \sTitelize, \give@title
+93/07/30 late@after@toks, inputlineno in group errmsg

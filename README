@@ -1,0 +1,64 @@
+About Lollipop and its manual.
+
+You have obtained a package containing the Lollipop format 
+and its manual.
+
+
+The manual uses only Computer Modern, but there are a few
+lines in `manual.tex' that allow you to switch easily to Times
+and Helvetica on Macintosh and Unix systems.
+
+The manual is a pretty good illustration of the power of
+Lollipop, but there is also a file 'address.tex' which
+contains example macros for an address book.
+
+Lollipop is still under development. The manual contains
+some remarks about what is still to be done. If you have any
+questions, remarks, suggestions (or if you want to voice
+your appreciation :-) , feel free to contact me:
+
+ Vafa Khalighi
+ persian-tex@tug.org
+
+Here is how much of TeX's memory the manual used:
+ 1367 strings out of 4672
+ 16421 string characters out of 20445
+ 69825 words of memory out of 70656
+ 3289 multiletter control sequences out of 10000
+ 19 hyphenation exceptions out of 307
+ 28i,4n,24p,185b,556s stack positions out of 
+  200i,60n,60p,5000b,2000s
+Output written on manual (60 pages, 147943 bytes).
+
+This clearly doesn't fit in the old-fashioned 64K TeX. If
+you don't have a BigTeX, follow the directions in the
+manual.tex file to process the manual in two parts. You will
+have to comment out once the first and once the second half,
+only formatting the other half. Since all auxiliary files
+have been supplied, this works. (Even then both halves of
+the manual barely fit in a 64k memory.) Otherwise formatting
+proceeds as indicated above.
+
+History so far:
+
+0.9  October 1992, first public release
+0.91 Unannounced update
+     TeX3 based lolplain
+     penalties and white space in embedded constructs
+     splittopskip set equal to topskip
+0.92 November 1992, update for friends and family
+     Copyright notices added
+     math family setting for \rm, \bf, \tt
+     bugs in penalties corrected
+0.93 December 1992, official update
+     Lots of nobreaks in pre/post-tex material of constructs
+     Synonym counters repaired
+     Topskip and raggedbottom in state of repair
+0.94 December 1992, unofficial update
+     Adaptive distances
+0.95 January 1993, unofficial update
+     Short titles, rewritten external files,
+     address book example format.
+     
+0.97 April 2014, organized and updated
+        files and also generated various formats.

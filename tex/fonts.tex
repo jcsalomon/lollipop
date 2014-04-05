@@ -1,0 +1,398 @@
+% Fonts.tex copyright 1992/3 Victor Eijkhout
+%                 copyright 2014    Vafa Khalighi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%% Font selection macros %%%%%%%%%%%
+
+%%%%
+%%%% Text Fonts
+%%%%
+
+\NewTrace:font
+
+% User commands to change the three parameters
+
+% \Typeface:FACE
+%     \F@name <-- FACE
+%
+\def\Typeface:#1
+   {\if\UndefinedCS{#1@code}\Wmessage{Undefined typeface: `#1'}\fi
+    \def\F@name{#1}}
+\let\TypeFace\Typeface
+
+% \Pointsize:NN
+%     \Fsize <-- NN
+%     compute script/sscript sizes
+%     if necessary install math fonts
+%
+\def\PointSize:#1 {\tempcounta=\@ww{#1}%
+    \edef\Fsize{\the\tempcounta}%this line is used in \set@mathfont
+    \xp\@setsizes\xp{\Fsize}%
+    \xp\pointsize@baselineskip\xp{\Fsize}}
+\let\Pointsize=\PointSize
+
+% \Style:STYLE
+%     \F@style <-- STYLE
+%     load actual font
+%     put font in \textfont0
+%     install value of \@space
+%
+\def\Style:#1 {\def\F@style{#1}%
+    \ifmmode\SetFamily\else\SetFont\fi}
+\def\ifStyle:#1 {\xp\if\xp\EqualStringX\xp{\F@style}{#1}}
+
+% and together this makes:
+%
+\def\current@font{\F@name\F@style\romannumeral\Fsize}
+
+
+% abbreviations for common styles
+%
+\def\tty{\Style:typewriter }
+\def\rm{\Style:roman }\def\bf{\Style:bold }\def\it{\Style:italic }
+\def\sl{\Style:italic }
+
+% Command for actual loading is also user command.
+% If this is in a style definition, fill the math families.
+%
+\def\SetFont{\maybe@load@font
+    \if@started\else\store@main@font\fi
+    \ifx\cs@a\relax %error condition if load not succeeded
+    \else \csname\cs@a\endcsname
+          \@@space=.5em\relax
+    \fi}
+\def\maybe@load@font{\edef\cs@a{\current@font}%
+    \if\UndefinedCS{\cs@a}\load@font\fi}
+\def\load@font{\def@f@ext@name
+    \Tmessage[font]{Loading font (text): \cs@a=`\f@ext@name'}%
+    \edef\cs@e{\global\font\CSname{\cs@a}=\f@ext@name\relax}\cs@e
+    }
+\def\def@f@ext@name
+   {\edef\f@ext@name{\ext@combo}%
+    \edef\f@ext@name{\ext@name
+         \ifx\f@ext@name\@empty \ext@style\ext@size
+         \else \f@ext@name \fi}}
+    
+\def\face@tag{\F@name @code}
+\def\cs@face@tag{\csname\face@tag\endcsname}
+
+% Find relative sizes of the current size
+% and install math fonts
+%
+\def\@ps@rls#1{ps@rls\romannumeral#1}
+\def\PointSizeScriptSizes:#1=#2,#3,#4 
+   {\csarg\def{\@ps@rls#1}{{#2}{#3}{#4}}}
+\def\@setsizes#1{\if\UndefinedCS{\@ps@rls{#1}}\tempcounta#1\relax
+        \tempcountb\tempcounta \multiply\tempcountb7 \divide\tempcountb10
+        \tempcountc\tempcounta \divide\tempcountc2
+        \edef\@@setsizes
+           {{\the\tempcounta}{\the\tempcountb}{\the\tempcountc}}%
+    \else
+        \edef\@@setsizes{\csname\@ps@rls{#1}\endcsname}%
+    \fi
+    \expandafter\@setsize\@@setsizes}
+\PointSizeScriptSizes:0=0,0,0
+\PointSizeScriptSizes:1=1,1,1
+\PointSizeScriptSizes:2=2,2,2
+\PointSizeScriptSizes:3=2,3,3
+\PointSizeScriptSizes:4=4,4,4
+\PointSizeScriptSizes:5=5,5,5
+\PointSizeScriptSizes:6=6,5,5
+\PointSizeScriptSizes:7=7,6,5
+\PointSizeScriptSizes:8=8,6,5
+\PointSizeScriptSizes:9=9,7,5
+\PointSizeScriptSizes:10=10,7,5
+\PointSizeScriptSizes:11=11,8,6
+
+% Fill in a math font family corresponding to the
+% surrounding size
+\def\SetFamily{\ifface@size@changed\begingroup
+%\tracingmacros=2 \tracingcommands\tracingmacros
+    \edef\tmp@sizes{\csname\@ps@rls{\Fsize}\endcsname}
+    \edef\Fsize{\xp\first@of@three\tmp@sizes}\maybe@load@font
+         \edef\cs@e{\global\textfont
+              \CSname{\F@style @fam}\CSname{\cs@a}}\cs@e
+    \edef\Fsize{\xp\second@of@three\tmp@sizes}\maybe@load@font
+         \edef\cs@e{\global\scriptfont
+              \CSname{\F@style @fam}\CSname{\cs@a}}\cs@e
+    \edef\Fsize{\xp\third@of@three\tmp@sizes}\maybe@load@font
+         \edef\cs@e{\global\scriptscriptfont
+              \CSname{\F@style @fam}\CSname{\cs@a}}\cs@e
+    \endgroup\fi
+    \csarg\fam{\F@style @fam}}
+\newfam\roman@fam  \def\roman@face@size{{foo}{bar}}
+\newfam\italic@fam \def\italic@face@size{{foo}{bar}}
+\newfam\bold@fam   \def\bold@face@size{{foo}{bar}}
+\newfam\tty@fam    \def\tty@face@size{{foo}{bar}}
+\def\ifface@size@changed{\iftrue}
+\def\temporarily@out@of@order
+   {\edef\cs@a{\csn\F@style @face@size\ecs}
+    \if\EqualString{\F@name}{\xp\take@former\cs@a}
+       \if\EqualString{\Fsize}{\xp\take@latter\cs@a}
+             \csn iffalse\xp\xp\xp\ecs
+       \else \Tmessage[font]{Loading family <\F@style>}
+             \csarg\edef{\F@style @face@size}%
+                {{\F@name}{\Fsize}}
+             \csn iftrue\xp\xp\xp\ecs\fi
+    \else \Tmessage[font]{Loading family <\F@style>}
+          \csarg\edef{\F@style @face@size}%
+                {{\F@name}{\Fsize}}
+          \csn iftrue\xp\ecs \fi}
+
+% Define relative sizes,
+% and install math fonts,
+% loading if necessary
+%
+\def\@setsize#1#2#3{%
+    \def\normal{\def\Fsize{#1}\SetFont}\relax
+    \def\script{\def\Fsize{#2}\SetFont}\relax
+    \def\scriptscript{\def\Fsize{#3}\SetFont}\relax
+    \def\style@sizes{#1,#2,#3 }}
+\newif\ifloading@math
+\def\math@setsize#1,#2,#3 {%
+    \SaveFont \loading@mathyes
+    \set@mathfont{#1}\textfont
+    \set@mathfont{#2}\scriptfont
+    \set@mathfont{#3}\scriptscriptfont
+    \RestoreFont \loading@mathno
+    }
+
+% these lines are in 'text.tex'
+%\everymath{\the\every@everymath}
+%\everydisplay{\the\every@everymath}
+%\every@everymath{\high@fam\count18\relax \xp\math@setsize\style@sizes}
+
+% Strut: .8\baselineskip+.2\baselineskip
+% note: struts should be locally defined!
+%
+\def\make@strut{\tempdima=.8\baselineskip \tempdimb=.2\baselineskip
+    \edef\strut{\vrule height \the\tempdima width \z@
+                       depth \the\tempdimb \relax}}
+
+% Main Font
+% is the font that's current at the end of the style definition
+% this is switched to in the output routine (head/footline!)
+% and the user can use it too.
+% this does not take properly care of baselineskip and strut.
+% nor math fonts, come to think of it.
+%
+\def\store@main@font
+   {\edef\MainFace{\def\nxp\F@name{\F@name}}
+    \SaveFont \let\MainFont\RestoreFont}
+\let\MainFont\relax %cs is used in output@setup, which may be called
+                    %from Lollipop.tex
+
+% Save and restore fonts
+%
+\def\SaveFont
+   {\edef\RestoreFont{\def\nxp\F@name{\F@name}%
+         \def\nxp\Fsize{\Fsize}%
+         \def\nxp\F@style{\F@style}%
+         \nxp\SetFont
+         \baselineskip=\the\baselineskip\relax
+                  }
+    }
+\def\RestoreFont{\Wmessage{No `Savefont' has been given}}
+
+% Defined Fonts
+% rather limited, because not upscalable.
+%
+\def\DefineFont:#1=#2,#3,#4 {\begingroup
+    \Typeface:#2 \PointSize:#3 \Style:#4 
+    \edef\cs@e{\global\let\CSname{#1}=\CSname{\current@font}}\cs@e
+    \endgroup}
+
+
+% Increase / decrease point size
+%
+\def\PointSizeLarger{\if\NextChar[%]
+    \ps@plus{\ps@plus[1]}}
+\def\PointSizeSmaller{\if\NextChar[%]
+    \ps@minus{\ps@minus[1]}}
+\def\ps@plus[#1]{\let\save@Fsize\Fsize
+    \tempcounta\Fsize\relax \advance\tempcounta#1\relax
+    \edef\Fsize{\the\tempcounta}\SetFont
+    \let\Fsize\save@Fsize}
+\def\ps@minus[{\ps@plus[-%]
+    }%]
+
+% Baselineskip
+%
+\def\BaselineSkip:#1 {\baselineskip\@ww{#1}\make@strut}
+\def\@ps@bls#1{ps@bls\romannumeral#1}
+\def\@@ps@bls#1{\tempcounta#1\relax\baselineskip\tempcounta pt
+    \baselineskip\bls@ps@ratio\baselineskip\relax}
+\def\BaselineSkipPointSizeRatio:#1 {\def\bls@ps@ratio{#1}}
+\BaselineSkipPointSizeRatio:1.2
+\def\PointSizeBaselineSkip:#1
+   {\edef\cs@e{\nxp\pointsize@baselineskip{\w@w{#1}}}\cs@e}%nxp?
+\def\pointsize@baselineskip#1{%also used in \PointSize
+    \if\UndefinedCS{\@ps@bls{#1}}\@@ps@bls{#1}%
+    \else \baselineskip\csname \@ps@bls{#1}\endcsname \fi
+    \make@strut}
+\def\SetPointSizeBaselineSkip:#1=#2 
+   {\edef\cs@e{\w@w{#1}}%
+    \csarg\edef{\@ps@bls\cs@e}{\w@w{#2}}}
+
+\def\exblssizes#1{\ifcase#1\z@ \or \z@ \or \z@ \or \z@ \or \z@
+    \or 6.1pt  %5
+    \or 7.3pt  %6
+    \or 8.5pt  %7
+    \or 9.7pt  %8
+    \or 11pt   %9
+    \or 12pt   %10
+    \or 13pt   %11
+    \or 14.5pt %12
+    \or 15.6pt %13 
+    \or 16.8pt %14
+    \or 18pt   %15
+    \or 19.2pt %16
+    \or 20.4pt %17
+    \or 21.6pt %18 
+    \or 22.8pt %19 
+    \or 24pt   %20
+    \else \ifnum#1=24 28pt \else
+          \ifnum#1=30 36pt \else
+          \ifnum#1=32 38pt \else
+          \ifnum#1=48 56pt \else
+          \z@  \Emessage{Unknown pointsize: #1}\fi\fi\fi\fi
+    \fi \normalbaselineskip\baselineskip} 
+
+%%%% Math Fonts
+% Math fonts are loaded through the \everymath and \everydisplay.
+% This means that they are undefined outside math.
+% Therefore, any load during the style definition is global.
+%
+% Symbol and extension fonts don't change with type
+% Control sequences \m@.. are \let to 0 or 1 to indicate that
+%  math at a certain size has been loaded
+
+% The ten point extension font is special because it is used
+% for all smaller sizes
+\font\exx=cmex10
+
+% Size to external name conversion for math fonts
+\def\mi@size#1{\ifcase#1 \or \or \or \or \or 5\or 6\or 7\or 8\or
+    9\or 10\or 10 \sc@led \magstephalf \or 10 \sc@led \magstep1\or
+    \or 10 \sc@led \magstep2\or \or 10 \sc@led \magstep3\or
+    \or 10 \sc@led \magstep3\or \or 10 \sc@led \magstep4\fi}
+\let\sy@size=\mi@size \let\cm@size=\mi@size
+\def\ex@size#1{\ifnum#1<10 10 \else\mi@size{#1}\fi}
+
+% For a size, test if it has been loaded yet, if not do;
+% then install as given style
+%
+\def\set@mathfont#1#2%% #1=size #2=\text/script/scriptscript style
+   {\if\UndefinedCS{m@\romannumeral#1}\begingroup
+     \Tmessage[font]{Loading math style \string#2 at #1pt}%\globaldefs\@ne
+     \load@mathfammember{cm}{MathIT}{mi}{#1}\mi@size{'177}\relax
+     \load@mathfammember{cm}{MathSY}{sy}{#1}\sy@size{'060}\relax
+     \load@mathfammember{cm}{MathRM} {r}{#1}\cm@size{-1}\relax
+     \ifnum#1>10 \load@mathfammember{cm}{MathEX}{ex}{#1}\ex@size{-1}\relax
+     \else \global\csarg\let{MathEX\romannumeral#1}\exx
+     \fi
+     \global\csarg\let{m@\romannumeral#1}1\relax
+    \endgroup\fi
+    \if\UndefinedCS{\F@name VMI\romannumeral#1}\begingroup
+     \def\Fsize{#1}\def\F@style{mitalic}%
+     \load@mathfammember{\cs@face@tag}
+            {\F@name VMI}{\ext@style}{#1}
+            {\ext@size\take@one}{-1}\relax
+    \endgroup\fi
+    \def\Fsize{#1}\SetFont #20\the\font
+    #21 \csname MathIT\romannumeral#1\endcsname
+    #22 \csname MathSY\romannumeral#1\endcsname
+    #23 \csname MathEX\romannumeral#1\endcsname
+    #2\Kgriek \csname MathRM\romannumeral#1\endcsname
+    #2\VMIfam \csname \F@name VMI\romannumeral#1\endcsname}
+\def\load@mathfammember
+    #1#2#3#4#5#6%
+        %% #1=root of external name #2=internal tag
+        %% #3=external tag #4=size #5=size convertor #6=skew character
+   {\Tmessage[font]{Loading font (math)
+                \csname#2\romannumeral#4\endcsname=#1#3#5{#4}}%
+    \global\xp\font\csname#2\romannumeral#4\endcsname=
+        #1#3#5{#4}\relax
+    \global\xp\skewchar\csname#2\romannumeral#4\endcsname=#6\relax
+   }
+
+% Allocate a family for cmr, which has Greek capitals
+%
+\storecat"    
+\ifini{\newfam\Kgriek}
+\mathchardef\Gamma="0\hexdigit\Kgriek 00
+\mathchardef\Delta="0\hexdigit\Kgriek 01
+\mathchardef\Theta="0\hexdigit\Kgriek 02
+\mathchardef\Lambda="0\hexdigit\Kgriek 03
+\mathchardef\Xi="0\hexdigit\Kgriek 04
+\mathchardef\Pi="0\hexdigit\Kgriek 05
+\mathchardef\Sigma="0\hexdigit\Kgriek 06
+\mathchardef\Upsilon="0\hexdigit\Kgriek 07
+\mathchardef\Phi="0\hexdigit\Kgriek 08
+\mathchardef\Psi="0\hexdigit\Kgriek 09
+\mathchardef\Omega="0\hexdigit\Kgriek 0A
+
+% Math italic variables have to be from the current typeface
+% maybe this should be switchable
+%
+\def\loop@redef@until#1{
+\loop \mathcode\tempcountb\tempcountc
+      \advance\tempcountb\@ne 
+      \advance\tempcountc\@ne 
+      \ifnum\tempcountb>#1\relax\else \repeat}
+\ifini{
+\newfam\VMIfam 
+\tempcounta=-"100 \advance\tempcounta"\hexdigit\VMIfam00
+\tempcountb=`a \tempcountc=\mathcode`a
+\advance\tempcountc\tempcounta
+\loop@redef@until{`z}
+\tempcountb=`A \tempcountc=\mathcode`A
+\advance\tempcountc\tempcounta
+\loop@redef@until{`Z}
+}
+
+\restorecat"
+\def\cal{\fam2}
+
+% Typewriter is a bit of a problem
+%
+ \font\ttix=cmtt9
+ \font\ttx=cmtt10 \font\ttxi=cmtt10 \sc@led \magstephalf
+ \font\ttxii=cmtt10 \sc@led \magstep1
+ \font\ttxiv=cmtt10 \sc@led \magstep2
+ \font\ttxvii=cmtt10 \sc@led \magstep3
+ \font\ttxx=cmtt10 \sc@led \magstep4
+
+\def\tt{\Typeface:ComputerModern \Style:typewriter }
+\def\terugstreep{{\tt \char`\\}}
+
+% Typeface Definition
+% \DefineTypeface{Naam}{rump}{style:exts}{size:exts}{combo:exts}
+% after this \Typeface:Naam can be used
+% the rump and the extension construct the external file names
+%
+\def\DefineTypeface#1#2#3#4{\csarg\def{#1@code}{#2}
+    \csarg\def{#1@styles}{#3 }
+    \csarg\def{#1@sizes}{#4 }
+    \if\NextChar[%]
+        {\DefineTypeface@combos{#1}}{\DefineTypeface@combos{#1}[]}}
+\def\DefineTypeface@combos#1[#2]{\csarg\def{#1@combos}{#2}}
+
+\def\style@selector{\mswitch \xp\if\xp\EqualStringX\xp{\F@style} in: }
+\def\a@style@selector#1{\mswitch \xp\if\xp\EqualStringX\xp{#1} in: }
+\def\size@selector{\fswitch {\ifnum\Fsize} in: }
+\def\a@size@selector#1{\fswitch {\ifnum#1} in: }
+
+\def\ext@combo{\csname\F@name @combos\endcsname}
+\def\ext@style{\xp\xp\xp\style@selector
+               \csname\F@name @styles\endcsname\endswitch}
+\def\ext@size {\xp\xp\xp\size@selector
+               \csname\F@name @sizes\endcsname\endswitch}
+\def\ext@name{\csname\F@name @code\endcsname}
+
+%\noeol
+\endinput
+
+92/11/05 math family setting
+93/07/03 removed \bold, \italic etc because of change in tools
+93/07/24 F@size -> Fsize, fontdefs file split off
+

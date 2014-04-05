@@ -1,0 +1,54 @@
+% Appendix.tex copyright1992 Victor Eijkhout
+%                       copyright 2014 Vafa Khalighi
+%
+\Chapter Example styles
+
+To show you the strength of \Lollipop, this chapter collects a few
+example style definitions. The first one is that of this manual.
+
+\Section The style definition for this book
+
+In case you were wondering how this book was typeset, here is the
+full style definition. By the standards of what Lollipop can do it is
+pretty pedestrian.
+
+One thing that may have provide intellectual titilation is the
+definition of \cs{Example} and \cs{OutExample}.
+It allowed me to keep the examples in sync with their output.
+
+Of course that
+doesn't really rely on \Lollipop. It does illustrate the fact that
+\Lollipop\ is interfaceable to arbitrary macros. (But don't try
+loading \Lollipop\ on top of \LaTeX! On second thought, do. It
+disables most of \LaTeX. Just kidding.)
+
+\begingroup \PointSize:8 \tt 
+\verbatimfile{mandefs.tex}\endgroup
+
+\Section[sec:address] Address book
+
+The following macros generate an address book. Several noteworthy
+features:
+\Itemize\item Most titles are short, that is, delimited by the line
+end.
+ \item Since a page will now have several dozens of headings, the
+number of marks placed will become a problem, therefore the option
+\opt{nomarks} is included everywhere. Without this you would easily
+have memory overflows.
+ \item The \cs{At} heading writes its information to an external
+file. This is then parsed by the macro \cs{CompNam}. A~slight amount
+of knowledge of Lollipop internals is used here for parameter parsing,
+but not more than can be gleaned from simply looking at the external
+file.\par
+ Then a token list is created for each company, and these lists are
+printed somewhere down the file. This is a bit of \TeX\ programming
+that is not quite elementary, but still \Lollipop saves you a lot of
+work.
+ \>
+If you want to see the output, run \TeX\ with Lollipop twice on the
+\file{address.tex} file.
+
+ \begingroup \PointSize:8 \tt 
+\verbatimfile{address.tex}\endgroup
+
+\endinput

@@ -1,0 +1,341 @@
+% Prelim.tex copyright 1992 Victor Eijkhout
+%                  copyright 2014 Vafa Khalighi
+%
+\Chapter[chap:prelim] Preliminaries
+
+\Section What is Lollipop?
+
+Lollipop is `\TeX\ made easy'. Lollipop is a macro package
+that functions as a toolbox for writing \TeX\ macros. It was my
+intention to make macro writing so easy that implementing a fully new
+layout in \TeX\ would become a matter of less than an hour for an
+average document, and that it would be a task that could be
+accomplished by someone with only a very basic training in \TeX\
+programming.
+
+Lollipop is an attempt to make structured text formatting available
+for environments where previously only wysiwyg packages could be used
+because adapting the layout is so much more easy with them than with
+traditional \TeX\ macro packages.
+
+\Section But is it compatible?
+
+Lollipop, like \LaTeX, is not compatible with plain \TeX. I~don't
+consider this a real problem. Most plain \TeX\ commands will work in
+\Lollipop\ with the exception of anything output routine related.
+(See also below.)
+
+\Lollipop\ is also not compatible with \LaTeX, although it has a lot
+of the same functionality. There are two reasons why \Lollipop\ still
+has a reason for existing, even though \LaTeX\ is used pretty much
+all over the scientific world.
+
+For one, Lollipop is targeted in part
+to different users than the typical plain \TeX\ or
+\LaTeX\ user. For another, I~have a vain hope that I~can capture some
+of the \LaTeX\ market share. Since developing styles in \Lollipop\ is
+so much more easier than in \LaTeX, I~may stand a fighting chance.
+
+\SubSection \Lollipop\ and plain \TeX
+
+Having said the above, I'll conceded that \Lollipop\ is more
+compatible with plain \TeX\ than with \LaTeX. You can use quite some
+plain \TeX\ commands in \Lollipop. However, stay away from the
+following:\Description\item \cs{everypar}
+This one is heavily used by \Lollipop. You may use \cs{EveryPar}
+instead, which functions pretty much like \cs{everypar}; see
+section~\ref[sec:everypar].\item \cs{output}
+Page output is done so very differently from plain \TeX\ that all
+commands pertaining to page numbers and head/footlines have been
+eradicated. (Well, \cs{pageno} still gives the page number.) See
+chapter~\ref[chap:output].
+ \>
+
+The current version of \Lollipop\ is based on the plain \TeX\ file
+that comes with \TeX\ version~3.0.
+
+\SubSection \Lollipop\ and \TeX\ programming
+
+The tools in \Lollipop\ allow you to program in a simple manner quite
+complicated macros. Still you may want to have some knowledge of
+ordinary \TeX\ macro programming. If you are just starting in \TeX\
+you can pick up the basics from the book by Seroul and
+Levy~\bibref[SeLe:book], 
+and after that there is the book by
+the original author of \TeX~\bibref[Kn:book] and my own \TeX\
+reference guide~\bibref[E:book].
+
+ \Section How to Use \Lollipop
+
+The following files comprise the Lollipop format:
+\Ver>
+    fonts.tex       lists.tex
+    define.tex      heading.tex     lollipop.tex    text.tex
+    document.tex    lolplain.tex    output.tex      tools.tex<Rev
+and it is assumed that you have a file called \file{hyphen.tex} with
+hyphenation patters for the language you are using.
+
+Run \IniTeX\ on \file{lollipop.tex}. On some systems \IniTeX\ is
+really called that, on others you may have to type \n{tex/i} or
+something like that. With Textures on the Macintosh you typeset using
+the `VirTeX' format (you can load \Lollipop\ on top of plain \TeX\
+if you have an old version,
+but you then have to ignore the error message about the \cs{patterns}
+command).
+
+ This gives, depending on your operating system, output that
+looks something like this:
+
+\Ver>> initex lollipop
+This is TeX, C Version 3.0 (INITEX)
+(lollipop.tex (lolplain.tex (hyphen.tex)) (tools.tex) (define.tex) (fonts.tex)
+(text.tex) (document.tex) (heading.tex) (output.tex) (lists.tex))
+Beginning to dump on file lollipop.fmt
+ (format=lollipop 92.5.30)
+3102 strings of total length 41719
+27016 memory locations dumped; current usage is 142&26543
+2076 multiletter control sequences
+\font\nullfont=nullfont
+...
+2706 words of font info for 12 preloaded fonts
+17 hyphenation exceptions
+Hyphenation trie of length 6075 has 181 ops out of 500
+  181 for language 0
+No pages of output.
+Transcript written on lollipop.log.<Rev
+
+As a result of this, you get a file \file{lollipop.fmt} that contains
+the Lollipop format. This has to be loaded in \TeX\ everytime you want
+to format a file. To process a file, say \file{test.tex}, with
+Lollipop you then type:
+\Ver>
+> tex &lollipop test <Rev
+or something like that, depending on local conditions (for Unix you
+will have to escape the ampersand).
+
+\Section[sec:style-dump] Processing a Lollipop file
+
+Files that you make to be processed with Lollipop contain of course
+the input text, but they also have to contain the design macros that
+determine the layout. There are two possibilities for these design
+macros:
+\Itemize
+\item You can simply put them in the same file, either in the
+beginning or wherever they are first needed, or
+\item You can put the layout definition in a separate file and make a
+new format out of that. For instance, if the layout definition of a
+book is complicated, processing it each time will be slow, so you
+might put it in a file \file{bookstyle.tex}. \IniTeX\ can load this
+definition on top of the Lollipop format:
+\Ver>
+> tex  &lollipopbookstyle
+*\dump<Rev
+This gives you a format \file{bookstyle.fmt}, 
+which you can use by typing
+\Ver>> tex &bookstyle book<Rev
+\>
+
+Also in the case where the style designer and the style user are on
+different levels of \TeX pertise it may be wise to hide the style
+definition from the user by making only a format available.
+
+\ImpNote
+The file \file{lollipop.tex} contains a \cs{dump} command. This is
+not the way plain \TeX\ and \LaTeX\ operate, but I~like this better.
+\ImpNoteStop
+
+If you have used \TeX\ before, you will notice that the page numbers
+get reported slightly differently from the usual way. See
+section~\ref[sec:page-counter] for the explanation.
+
+\Section The errors of \Lollipop / known bugs
+
+Since \Lollipop\ is an order of magnitude more powerful
+(and hence complicated) than formats such as \LaTeX, its error
+messages can also be an order of magnitude more cryptic (see
+section~\ref[sec:error-msg] for the possible origin of some of the
+more obscure error messages). 
+
+Fortunately, \Lollipop\ is also quite a
+bit better than existing formats at catching potential errors. Typos
+in a style definition will usually lead to warning messages, and also
+during run time \Lollipop\ is able to track down ommisions.
+
+In addition, you can switch on various trace modes to get more
+detailed information about \Lollipop's thought processes. See
+chapter~\ref[chap:tracing].
+
+These are the known bugs in \Lollipop\ at the moment.
+
+\Enumerate\item Local references have been insufficiently tested,
+and the code definitely is buggy.
+\item The `firstpage' test in the page grids does not work.
+\item The table of contents example is slightly wrong.
+\item Titles get written to the aux file with double spaces.
+This shouldn't cause any problem, but it has to be fixed.
+\item Rules in page grids get white space around them.
+\item External items shouldn't declare \cs{FooTitle} or 
+\cs{FooCounter}.
+\item \cs{ToExternalFile} doesn't work.
+ \>
+
+\Section About this manual
+
+This manual consists of a main file \file{manual.tex}, and the
+following input files:
+\Ver>
+titlepag.tex prelim.tex struct.tex head.tex list.tex
+out.tex extern.tex opt.tex comm.tex trace.tex appendix.tex<Rev
+and the style definition file \file{mandefs.tex}.
+
+In addition, you need \file{comment.tex} which is used to format this
+manual, and \file{btxmac.tex} for the Bib\TeX\ interface, but these
+are not really a part of \Lollipop.
+
+If you format this manual (which you'll have to do three times
+to get the page numbering and the table of contents straight) you'll
+notice something strange. The file \file{example.tex} is read in
+many, many times. This is because this manual formats its examples
+along the way, first writing them out, and then reading them in to
+show both their code and their output. This way it is guaranteed that
+the examples in the manual will always work.
+
+As a result of formatting this manual you will wind up with, apart
+from the usual \file{dvi} and \file{log} file, with \file{manual} files
+with extensions \file{aux}, \file{toc}, and \file{imp}; 
+\file{oix} and \file{cix} for indexes of options and commands,
+and
+\file{tct}, file{tix} which are for the examples. For the
+bibliography there are the Bib\TeX\ input file \file{manual.bib} and
+output file \file{manual.bbl}.
+
+This manual needs quite some resources: here's what \TeX\ told me
+it needed.
+\Ver>Here is how much of TeX's memory you used:
+ 1259 strings out of 4808
+ 14894 string characters out of 21967
+ 62606 words of memory out of 65536
+ 3042 multiletter control sequences out of 10000
+ 19 hyphenation exceptions out of 307
+ 22i,4n,24p,225b,502s stack positions out of 
+ 200i,60n,60p,5000b,2000s<Rev
+This should not need a `Big \TeX', but it comes close.
+
+Because of all the examples this manual takes quite some time to
+process. A~factor of four over the time for a regular document of
+similar length should be expected. Ordinary Lollipop documents will
+proceed far faster.
+
+\Section The most boring section in this manual
+
+There are a few things about \Lollipop\ that I~want to be clear about.
+
+\SubSection I am going to hurt you and I am not sorry
+
+In the secret handbook for the software industry it says that the
+final test phase of a product consists of putting it in stores and
+having innocent suckers pay good money for it. (You guessed it, this
+is the disclaimer section.) So let me just say that 
+\Lollipop\ is probably good for nothing, at least, I~don't claim it
+is. And if you hurt yourself by using it, don't blame me. I~warned
+you.
+
+\SubSection Get a \Lollipop, give one away
+
+\Lollipop\ is free of charge. You may copy it
+for your own purposes, or give away copies. However, you may not ask
+money for it, other than reasonable expenses such as for copying discs
+or manuals. If you make changes to \Lollipop, the changed files
+should be given a different name, and the fact that they are changed
+should be clearly indicated. Although I~retain the copyright, the
+rights for non-profit use of \Lollipop\ are granted.
+
+The easiest way to get the current copy of \Lollipop\ is to ftp it
+from \n{cs.utk.edu} from the directory \n{/pub/eijkhout/tex} where it
+is stored as \n{lollipop.tar.Z}. Starting with version 0.93 there
+is also a self-extracting Macintosh archive.
+
+\SubSection The status of \Lollipop
+
+\Lollipop\ is still under development. Although I~will try not to
+make any drastic changes in the user interface (this says nothing
+about the internals!) I~really cannot guarantee anything.
+However, I~do listen to complaints and suggestions. 
+
+If you have suggestions or complaints about the
+useability of \Lollipop\ or the implementation, feel free to contact
+me at \cs{eijkhout@cs.utk.edu} on the Internet. Or send snail mail
+to:
+\Ver>    Victor Eijkhout
+    Department of Computer Science
+    University of Tennessee
+    107 Ayres Hall
+    Knoxville TN 37996
+    USA<Rev
+
+\SubSection[sec:wish:list] The wish list
+
+\Lollipop\ is not quite perfect. Here's a list of things that I~am
+going to be adding in the near future. If you want to add items to
+this list, just mail me.
+
+\Enumerate\item Raggedbottom should really, really be added. Soon!
+
+\item Capitalization and initial capping of titles. If a
+title appears in mixed case, it should be possible to have it in all
+uppercase in running heads. Some code has been disabled now.
+
+\item A better multi-column mode.
+
+\item Interface to Bib\TeX\ seems to largely in place; what happens
+if you don't load btxmac?
+
+\item Inserts, in particular footnotes. At the moment floating
+figures are entirely lacking. (As a matter of fact, the plain \TeX\
+macros are availble, but I'm not telling that.)
+
+\item A `nomarks' option to prevent wasting two token lists.
+Maybe other recourse saving optio for the expert designer?
+
+\item More sophisticated white space right before and after
+page breaks. (Use at least so and so much.)
+
+\item Dynamic topskip.
+
+{\PopIndentLevel\Indent:no The following points are debatable:
+maybe I~should just steal a few components from \LaTeX. Maybe this
+sort of stuff does not belong in \Lollipop.\par}
+
+\item A tabular mode. Personally I~always felt \cs{halign} to be more
+than sufficient, but some people seem to think otherwise.
+
+\item Maths constructs. Some things in the \cs{eqalign} vein would be
+nice.
+
+\>
+
+\SubSection A bit of history
+
+The \Lollipop\ format was begun in late 1989 to typeset my Ph.D.
+thesis, `{\Style:italic Vectorizable and Parallelizable
+Preconditioners for the Conjugate Gradient Method}'. At that time 
+I~was using \TeX\ on an Atari 1040ST.
+Loading the style definition for the thesis took about two minutes.
+\Lollipop\ was heavily augmented in late 1991 to typeset my book
+`{\Style:italic \TeX\ by Topic}', for which I~used Sun~3 and Sun~4
+computers. Writing this manual brought \Lollipop\ to its present
+state; the first public release (version~0.9) was announced on the
+internet in October 1992. At present I~am using Lightning Textures on a
+Macintosh Powerbook~145.
+
+The name `\cs{Lollipop}' refers to a quote by Alan
+Perlis~\bibref[Pe:epigrams], quoted on page 365 of the \TeX
+book~\bibref[Kn:book]. In a way it's rather pretentious. The philosophy
+of the \cs{Lollipop} format is described~\bibref[EL:Cork,E:Portland].
+
+\endinput
+
+92/10/22 historical remark about name added
+92/11/03 section 'Lollipop and plain TeX' added;
+         remarks about IniTeX in Textures
+92/11/26 uses bibrefs

@@ -1,0 +1,83 @@
+% Manual.tex master file for the Lollipop TeX manual.
+% this file and all input files for it copyright 1992 Victor Eijkhout,
+%                                                 copyright 2014 Vafa Khalighi,
+% except where indicated otherwise.
+%
+\tracingstats=1
+\makeatletter
+\makeatother
+\showboxdepth=-1
+
+\input comment
+% By shuffling the \comment line you can load different fonts.
+% This is machine dependent, so by default you get the CM font,
+% which should work everywhere.
+%
+\def\SerifFace{\TypeFace:ComputerModern }
+\def\SansFace{\TypeFace:ComputerSans }
+\comment
+% Macintosh Times & Helvetica
+\def\SerifFace{\TypeFace:macTimes }
+\def\SansFace{\TypeFace:macHelvetica }
+% Unix Postscript has different names
+\def\SerifFace{\TypeFace:unixTimes }
+\def\SansFace{\TypeFace:unixHelvetica }
+\endcomment 
+
+% Now load the style definition. This takes some time.
+\input mandefs
+
+% Prevent regeneration of external files; change 'yes' into 'no'
+% if you are changing page dimensions or so.
+\WriteExtern:yes
+
+% BibTeX interface by Berry and Patashnik
+\input btxmac
+
+% Start formating
+\Start
+
+% Include the next line if you are formatting the second half
+% of this manual:
+%\comment
+
+\CounterRepresentation:Page=i \RightPage
+\InputFile:titlepag
+
+\InputFile:prelim
+\SetCounter:LastInPage=PageValue
+\BackStepCounter:LastInPage
+
+\ToRecto\RightPage
+\CounterRepresentation:Page=1 \SetCounter:Page=1
+
+\InputFile:struct
+
+\InputFile:head
+
+\InputFile:list
+
+% For the first half include the following line:
+%\Stop
+% For second half include the following lines:
+%\endcomment
+%\RightPage \SetCounter:Page=11
+
+\InputFile:out
+
+\InputFile:extern
+
+\InputFile:opt
+
+\InputFile:comm
+
+\InputFile:trace
+
+\InputFile:appendix
+
+\SetCounter:LastRegPage=PageValue
+\BackStepCounter:LastRegPage
+\Stop
+
+92/11/20 Total pages counter
+93/01/08 \comment and such for two part processing

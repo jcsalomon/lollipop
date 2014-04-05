@@ -1,0 +1,62 @@
+% Titlepag.tex copyright 1992 Victor Eijkhout
+%                     copyright 2014 Vafa Khalighi
+%
+\EmptyPage
+\begingroup\AlwaysIndent:no
+\PointSize:25 \Style:bold  Lollipop Unwrapped
+
+\white:30pt
+
+\PointSize:20 \SetFont Victor Eijkhout and Vafa Khalighi
+
+\white:50pt
+
+\PointSize:15 \Style:roman
+A manual for the Lollipop \TeX\ format,\par
+last updated April 2014\par
+Pages: \LastInPageCounter+\LastRegPageCounter
+% so far we could have done this with labels, however
+\AddToCounter:LastRegPage=LastInPageValue
+=\LastRegPageCounter.
+
+\EjectPage
+\endgroup
+
+\Chapter Contents
+
+\Section Regular sections
+
+\LoadExternalFile:contents
+
+%\Section Implementer's notes
+
+%\LoadExternalFile:impnotes
+
+\Section All of the options
+
+(You know, this section and the next look much better if you sort the
+\file{manual.oix} and \file{manual.cix} files before you format the
+document the last time. Do put lines
+ \Ver>\Writeopindex:no
+\Writecsindex:no<Rev somewhere in
+the top of the \file{manual.tex} file in order to prevent 
+overwriting of these files
+after you've sorted them.)
+
+\Indent:no \rightskip=0pt plus 5cm
+\LoadExternalFile:optindex
+
+\Section All of the commands
+
+\Indent:no
+\LoadExternalFile:csindex
+
+\Section Bibliography
+
+\bibliographystyle{plain}
+\bibliography{manual}
+
+\endinput
+
+92/11/19 Page total included
+92/11/26 Bibliography
