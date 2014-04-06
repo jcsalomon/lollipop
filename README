@@ -60,5 +60,8 @@ History so far:
      Short titles, rewritten external files,
      address book example format.
      
-0.97 April 2014, organized and updated
+0.97 4 April 2014, organized and updated
         files and also generated various formats.
+        
+0.98 6 April 2014, changed all lollipop filenames
+           to start with `lollipop' prefix.

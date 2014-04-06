@@ -11,7 +11,7 @@ see below.
 
 
 
-Name: define.tex
+Name: lollipop-define.tex
 Description: cross referencing macros for 
   the lollipop package
 Keywords: lollipop, macro package, style definitions
@@ -21,7 +21,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: document.tex
+Name: lollipop-document.tex
 Description: document handling macros for the
   lollipop package
 Keywords: lollipop, macro package, style definitions
@@ -31,7 +31,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: float.tex
+Name: lollipop-float.tex
 Description: floating insertion macros
   for the lollipop package
 Keywords: lollipop, macro package, style definitions
@@ -41,7 +41,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: fontdefs.tex
+Name: lollipop-fontdefs.tex
 Description: fontdefinitions for the lollipop package
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
@@ -50,7 +50,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: fonts.tex
+Name: lollipop-fonts.tex
 Description: font handling macros
   for the lollipop package
 Keywords: lollipop, macro package, style definitions
@@ -60,7 +60,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: heading.tex
+Name: lollipop-heading.tex
 Description: heading macros for the lollipop package
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
@@ -69,7 +69,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: lists.tex
+Name: lollipop-lists.tex
 Description: list definition macros
   for the lollipop package
 Keywords: lollipop, macro package, style definitions
@@ -90,7 +90,7 @@ Note: requires define.tex, document.tex float.tex,
  fontdefs.tex, fonts.tex, heading.tex, lists,tex,
  lolplain.tex, output.tex, text.tex, tools.tex.
 
-Name: lolplain.tex
+Name: lollipop-plain.tex
 Description: version of plain.tex customized
   for the lollipop package
 Keywords: lollipop, macro package, style definitions
@@ -100,7 +100,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: output.tex
+Name: lollipop-output.tex
 Description: output routine macros
   for the lollipop package
 Keywords: lollipop, macro package, style definitions
@@ -110,7 +110,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: text.tex
+Name: lollipop-text.tex
 Description: text environment definitions
   for the lollipop package
 Keywords: lollipop, macro package, style definitions
@@ -120,7 +120,7 @@ Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
-Name: tools.tex
+Name: lollipop-tools.tex
 Description: utility macros for the lollipop package
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
@@ -183,7 +183,7 @@ Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
 
-Name: manual.tex
+Name: lollipop-manual.tex
 Description: master file for the lollipop TeX manual
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
@@ -191,7 +191,7 @@ Supported: yes
 Latest version: v0.97, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: requires comment.tex, extern.tex, head.tex, list.tex
- mandefs.tex, manual.bbl, opt.tex, out.tex, prelim.tex,
+ mandefs.tex, lollipop-manual.bbl, opt.tex, out.tex, prelim.tex,
  struct.tex, titlepag.tex, trace.tex.
 
 Name: opt.tex
