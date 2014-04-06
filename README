@@ -64,6 +64,5 @@ History so far:
         files and also generated various formats.
         
 0.98 6 April 2014, changed all lollipop filenames
-           to start with `lollipop' prefix.
+           to start with `lollipop' prefix, and fixed typewriter font.
            
-0.99 May 2014, fixed typewriter font.

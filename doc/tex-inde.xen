@@ -17,7 +17,7 @@ Description: cross referencing macros for
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -27,7 +27,7 @@ Description: document handling macros for the
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -37,7 +37,7 @@ Description: floating insertion macros
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -46,7 +46,7 @@ Description: fontdefinitions for the lollipop package
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -56,7 +56,7 @@ Description: font handling macros
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -65,7 +65,7 @@ Description: heading macros for the lollipop package
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -75,7 +75,7 @@ Description: list definition macros
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -84,7 +84,7 @@ Description: main file for the lollipop package
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: requires define.tex, document.tex float.tex, 
  fontdefs.tex, fonts.tex, heading.tex, lists,tex,
@@ -96,7 +96,7 @@ Description: version of plain.tex customized
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -106,7 +106,7 @@ Description: output routine macros
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -116,7 +116,7 @@ Description: text environment definitions
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -125,7 +125,7 @@ Description: utility macros for the lollipop package
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the lollipop package, see lollipop.tex.
 
@@ -137,7 +137,7 @@ Description: comment environment for plain TeX,
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -148,7 +148,7 @@ Description: description of external file handling
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -158,7 +158,7 @@ Description: description of headings in lollipop TeX.
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -168,7 +168,7 @@ Description: description of lists in lollipop TeX.
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -178,7 +178,7 @@ Description: style definition for the lollipop TeX manual.
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -188,7 +188,7 @@ Description: master file for the lollipop TeX manual
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: requires comment.tex, extern.tex, head.tex, list.tex
  mandefs.tex, lollipop-manual.bbl, opt.tex, out.tex, prelim.tex,
@@ -200,7 +200,7 @@ Description: description of construct options
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -211,7 +211,7 @@ Description: description of output handling
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -221,7 +221,7 @@ Description: introductory chapter of lollipop manual.
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -232,7 +232,7 @@ Description: description of the overall structure of
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -242,7 +242,7 @@ Description: titlepage of the lollipop manual
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
@@ -252,7 +252,7 @@ Description: description of trace modes in lollipop TeX
 Keywords: lollipop, macro package, style definitions
 Author: Victor Eijkhout and Vafa Khalighi
 Supported: yes
-Latest version: v0.99, April 2014
+Latest version: v0.98, April 2014
 Archives: https://github.com/vafa/lollipop
 Note: part of the manual of the lollipop package,
   see lollipop.tex.
