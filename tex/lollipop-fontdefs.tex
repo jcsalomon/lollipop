@@ -1,14 +1,16 @@
+% copyright 2014 Vafa Khalighi
+
 %\noeol
 % good (?) old Computer Modern
 \DefineTypeface{ComputerModern}{cm}%
-    {roman:r; slant:sl; italic:ti; mitalic:mi; bold:bx; tty:tt;
+    {roman:r; slant:sl; italic:ti; mitalic:mi; bold:bx; typewriter:tt;
      default:r;}%
     {<6:5; <7:6; <8:7; <9:8; <10:9; <11:10; <12:10 \sc@led\magstephalf;
      <14:10 \sc@led\magstep1; <16:10 \sc@led\magstep2;
      <20:10 \sc@led\magstep3; >19:10 \sc@led\magstep4;
      default:10;}%
     [\ifStyle:italic \ifnum\Fsize<7 ti7\fi\fi
-     \ifStyle:tty \ifnum\Fsize<8 tt8\fi\fi]
+     \ifStyle:typewriter \ifnum\Fsize<8 tt8\fi\fi]
 \DefineTypeface{ComputerSans}{cmss}%
     {roman:; italic:i; mitalic:i; bold:bx; demiboldcondensed:dc;
      default:;}%
