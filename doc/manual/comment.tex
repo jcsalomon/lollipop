@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Comment.sty   version 3.0, 3 September 1992
+% comment.sty   version 3.0, 3 September 1992
 % selectively in/exclude pieces of text: the user can define new
 % comment versions, and each is controlled separately.
 % Special comments can be defined where the user specifies the
@@ -9,14 +9,8 @@
 % most other packages too.
 %
 % Author
-%    Victor Eijkhout
-%    Department of Computer Science
-%    University Tennessee at Knoxville
-%    104 Ayres Hall
-%    Knoxville, TN 37996
-%    USA
-%
-%    eijkhout@cs.utk.edu
+%    Victor Eijkhout and Vafa Khalighi
+%   persian-tex@tug.org
 %
 % Usage: all text included in between 
 %    \comment ... \endcomment
@@ -50,6 +44,22 @@
 % are defined as noop
 %
 % This file copyright Victor Eijkhout and Vafa Khalighi.
+%
+%
+%    This program is free software: you can redistribute it and/or modify
+%    it under the terms of the GNU General Public License as published by
+%    the Free Software Foundation, either version 3 of the License, or
+%    (at your option) any later version.
+%
+%    This program is distributed in the hope that it will be useful,
+%    but WITHOUT ANY WARRANTY; without even the implied warranty of
+%    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%    GNU General Public License for more details.
+%
+%    You should have received a copy of the GNU General Public License
+%    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+%
 
 \def\makeinnocent#1{\catcode`#1=12 }
 \def\csarg#1#2{\expandafter#1\csname#2\endcsname}
