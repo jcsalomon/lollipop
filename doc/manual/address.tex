@@ -67,7 +67,7 @@
 \def\WorksAt{Works at: }
 \DefineHeading:At macro:embed 
  HasTitle:short WorksAt title Spaces:2
- external:companies title title:Entity external:stop Stop
+ external:companies title unhskip title:Entity unhskip external:stop Stop
 % When the 'companies' file gets loaded the title only gets
 % parsed by the macro \CompNam, and nothing else happens.
 % The title is split into company and person; #1 becomes the name
@@ -86,7 +86,7 @@
 \DefineExternalFile:births=brt
 \DefineHeading:birthday HasTitle:short macro:embed 
   literal:Born : title Spaces:2 
- external:births title title:Entity external:stop Stop
+ external:births title unhskip title:Entity unhskip external:stop Stop
 % Later every month becomes something like an entity;
 % here is how we generate a token list for each month.
 %
